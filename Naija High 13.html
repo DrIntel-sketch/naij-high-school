@@ -1,0 +1,1320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Naija High</title>
+<style>
+:root { --ink: #102030; --btn: rgba(255,255,255,0.6); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --ink: #f0f4f8; --btn: rgba(20,30,40,0.6); } }
+:root[data-theme="dark"] { --ink: #f0f4f8; --btn: rgba(20,30,40,0.6); }
+:root { --panel: rgba(255,255,255,0.95); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --panel: rgba(20,30,40,0.95); } }
+:root[data-theme="dark"] { --panel: rgba(20,30,40,0.95); }
+#cash { position: fixed; right: 12px; top: calc(12px + env(safe-area-inset-top, 0px)); color: var(--ink); background: var(--btn); font: 700 15px sans-serif; padding: 6px 10px; border-radius: 10px; }
+#act { position: fixed; right: 16px; bottom: calc(212px + env(safe-area-inset-bottom, 0px)); display: none; padding: 12px 18px; border: 0; border-radius: 16px; background: #4caf50; color: #fff; font: 700 16px sans-serif; }
+#talk { position: fixed; right: 16px; bottom: calc(156px + env(safe-area-inset-bottom, 0px)); display: none; padding: 12px 18px; border: 0; border-radius: 16px; background: #f5b800; color: #102030; font: 700 16px sans-serif; }
+#dlg { position: fixed; left: 12px; right: 12px; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); display: none; background: var(--panel); color: var(--ink); border-radius: 16px; padding: 14px; font: 16px sans-serif; box-shadow: 0 4px 20px rgba(0,0,0,0.25); }
+#dname { font-weight: 700; margin-bottom: 6px; }
+#dchoices button { display: block; width: 100%; margin-top: 8px; padding: 12px; border: 0; border-radius: 12px; background: #f5b800; color: #102030; font: 600 15px sans-serif; }
+html, body { margin: 0; height: 100%; overflow: hidden; background: #87ceeb; touch-action: none; user-select: none; -webkit-user-select: none; }
+canvas { position: fixed; inset: 0; width: 100%; height: 100%; }
+#footer { position: fixed; left: 12px; bottom: calc(10px + env(safe-area-inset-bottom, 0px)); color: var(--ink); background: var(--btn); font: 600 11px sans-serif; padding: 3px 8px; border-radius: 8px; }
+#zoom { position: fixed; right: 12px; top: 38%; display: flex; flex-direction: column; gap: 8px; }
+#zoom button { width: 44px; height: 44px; border: 0; border-radius: 12px; background: var(--btn); color: var(--ink); font: 700 22px sans-serif; touch-action: manipulation; }
+#hint { position: fixed; left: 50%; transform: translateX(-50%); top: calc(80px + env(safe-area-inset-top, 0px)); color: var(--ink); background: var(--btn); font: 600 13px sans-serif; padding: 5px 12px; border-radius: 10px; transition: opacity 1s; pointer-events: none; max-width: 90vw; text-align: center; }
+#energy { position: fixed; left: 12px; top: calc(52px + env(safe-area-inset-top, 0px)); width: 120px; height: 14px; background: var(--btn); border-radius: 8px; overflow: hidden; }
+#efill { height: 100%; width: 100%; background: #4caf50; }
+#hud { position: fixed; left: 12px; top: calc(12px + env(safe-area-inset-top, 0px)); color: var(--ink); background: var(--btn); font: 600 15px sans-serif; padding: 6px 10px; border-radius: 10px; }
+#pad { position: fixed; right: 16px; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); display: grid; grid-template-columns: repeat(3, 60px); grid-auto-rows: 60px; gap: 6px; }
+#pad button { border: 0; border-radius: 14px; background: var(--btn); color: var(--ink); font-size: 24px; touch-action: none; }
+#up { grid-column: 2; grid-row: 1; }
+#left { grid-column: 1; grid-row: 2; }
+#down { grid-column: 2; grid-row: 2; }
+#right { grid-column: 3; grid-row: 2; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="hud"></div>
+<div id="energy"><div id="efill"></div></div>
+<div id="hint"></div>
+<div id="zoom"><button id="zin" aria-label="zoom in">+</button><button id="zout" aria-label="zoom out">−</button></div>
+<div id="footer">Made by DrIntel</div>
+<div id="cash">₦0</div>
+<button id="act"></button>
+<button id="talk"></button>
+<div id="dlg"><div id="dname"></div><div id="dtext"></div><div id="dchoices"></div></div>
+<div id="pad">
+  <button id="up" aria-label="forward">▲</button>
+  <button id="left" aria-label="left">◀</button>
+  <button id="down" aria-label="back">▼</button>
+  <button id="right" aria-label="right">▶</button>
+</div>
+<script>
+try {
+  const cv = document.getElementById("c");
+  const g = cv.getContext("2d");
+  let W = 360, H = 640;
+  function resize() {
+    W = cv.width = document.documentElement.clientWidth || 360;
+    H = cv.height = document.documentElement.clientHeight || 640;
+  }
+  resize();
+  new ResizeObserver(resize).observe(document.documentElement);
+
+  // ---------- 1. VECTOR HELPERS ----------
+  const sub = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
+  const add = (a, b) => [a[0] + b[0], a[1] + b[1], a[2] + b[2]];
+  const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+  const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+  const norm = (a) => { const l = Math.hypot(a[0], a[1], a[2]); return [a[0] / l, a[1] / l, a[2] / l]; };
+  const rotX = (v, a) => {
+    const c = Math.cos(a), s = Math.sin(a);
+    return [v[0], v[1] * c - v[2] * s, v[1] * s + v[2] * c];
+  };
+  const orient = (v, b) => rotY(b.rx ? rotX(v, b.rx) : v, b.r); // a box's own turn: tilt first, then spin
+  const rotY = (v, a) => {
+    const c = Math.cos(a), s = Math.sin(a);
+    return [v[0] * c + v[2] * s, v[1], -v[0] * s + v[2] * c];
+  };
+
+  // ---------- 2. GROUND: tile (i, j) covers x from i to i+1 and z from j to j+1 ----------
+  const SAND = [214, 196, 150];
+  function tileColor(i, j) {
+    if ((i === -1 || i === 0) && j >= -4) return SAND;                    // path from gate to classroom
+    if (i >= 3 && i <= 9 && j >= 1 && j <= 8)                             // football field stripes
+      return i % 2 === 0 ? [102, 187, 106] : [88, 170, 92];
+    return (i + j) % 2 === 0 ? [76, 175, 80] : [67, 160, 71];             // normal grass checker
+  }
+  const tiles = [];
+  for (let i = -12; i < 12; i++)
+    for (let j = -12; j < 12; j++)
+      tiles.push({ i: i, j: j, c: tileColor(i, j) });
+
+  // ---------- 3. SOLID OBJECTS ----------
+  // box(x, y, z, hx, hy, hz, color): y is measured UP from the top of the ground
+  const solids = [];
+  function box(x, y, z, hx, hy, hz, c) {
+    solids.push({ p: [x, 0.5 + y, z], h: [hx, hy, hz], r: 0, c: c });
+  }
+  const WALLS = []; // flat rectangles the student cannot enter
+
+  // classroom block: walls, roof, door, four windows
+  box(0, 1.5, -6, 5, 1.5, 2, [245, 235, 200]);
+  box(0, 3.15, -6, 5.3, 0.15, 2.3, [150, 50, 40]);
+  box(0, 0.8, -3.97, 0.5, 0.8, 0.03, [90, 55, 30]);
+  for (const wx of [-3.8, -2.2, 2.2, 3.8]) box(wx, 1.8, -3.97, 0.45, 0.4, 0.03, [150, 200, 235]);
+  WALLS.push({ x0: -5, x1: 5, z0: -8, z1: -4 });
+
+  // fence: segments 2 wide, around the edge, with a gap for the gate
+  for (let k = -11; k <= 11; k += 2) {
+    const c = ((k + 11) / 2) % 2 === 0 ? [235, 235, 225] : [150, 190, 230];
+    box(k, 0.6, -11.5, 1, 0.6, 0.15, c);                      // back fence
+    if (k !== -1 && k !== 1) box(k, 0.6, 11.5, 1, 0.6, 0.15, c); // front fence, gate gap at -1 and 1
+    box(-11.5, 0.6, k, 0.15, 0.6, 1, c);                      // left fence
+    box(11.5, 0.6, k, 0.15, 0.6, 1, c);                       // right fence
+  }
+  box(-2.3, 0.9, 11.5, 0.3, 0.9, 0.3, [60, 110, 190]);        // gate pillars
+  box(2.3, 0.9, 11.5, 0.3, 0.9, 0.3, [60, 110, 190]);
+
+  // trees: trunk plus two leaf blocks
+  function tree(x, z) {
+    box(x, 0.8, z, 0.2, 0.8, 0.2, [110, 75, 40]);
+    box(x, 2.2, z, 0.8, 0.6, 0.8, [34, 120, 50]);
+    box(x, 3.2, z, 0.5, 0.4, 0.5, [40, 140, 60]);
+    WALLS.push({ x0: x - 0.2, x1: x + 0.2, z0: z - 0.2, z1: z + 0.2 });
+  }
+  tree(-8, -1);
+  tree(-8, 5);
+  tree(-6, 8);
+  tree(8.5, -9);
+
+  // buka (food stall): counter, back wall, four posts, roof, sign, food on the counter
+  box(8.5, 0.55, -3.2, 1.6, 0.55, 0.35, [150, 100, 55]);
+  box(8.5, 1.0, -5.25, 1.8, 1.0, 0.08, [245, 235, 200]);
+  for (const px of [6.8, 10.2]) for (const pz of [-2.9, -5.1]) box(px, 1.0, pz, 0.08, 1.0, 0.08, [110, 75, 40]);
+  box(8.5, 2.15, -4, 1.9, 0.12, 1.3, [200, 50, 40]);
+  box(8.5, 2.5, -2.72, 1.2, 0.2, 0.04, [255, 214, 64]);
+  box(7.6, 1.3, -3.2, 0.22, 0.2, 0.22, [60, 60, 70]);
+  box(8.6, 1.2, -3.2, 0.3, 0.1, 0.2, [240, 240, 235]);
+  box(9.5, 1.25, -3.2, 0.2, 0.15, 0.2, [220, 150, 50]);
+  WALLS.push({ x0: 6.9, x1: 10.1, z0: -3.55, z1: -2.85 });
+  WALLS.push({ x0: 6.7, x1: 10.3, z0: -5.35, z1: -5.15 });
+
+  const FACES = [
+    { n: [0, 1, 0],  s: 1,    v: [[-1, 1, -1], [1, 1, -1], [1, 1, 1], [-1, 1, 1]] },
+    { n: [1, 0, 0],  s: 0.8,  v: [[1, 1, -1], [1, 1, 1], [1, -1, 1], [1, -1, -1]] },
+    { n: [-1, 0, 0], s: 0.8,  v: [[-1, 1, -1], [-1, 1, 1], [-1, -1, 1], [-1, -1, -1]] },
+    { n: [0, 0, 1],  s: 0.65, v: [[-1, 1, 1], [1, 1, 1], [1, -1, 1], [-1, -1, 1]] },
+    { n: [0, 0, -1], s: 0.65, v: [[-1, 1, -1], [1, 1, -1], [1, -1, -1], [-1, -1, -1]] }
+  ];
+
+  // ---------- 4. CHARACTERS ----------
+  // each part's color is a NAME; a character's "look" says what each name means
+  const SH_R = [0.44, 1.28, 0], SH_L = [-0.44, 1.28, 0]; // shoulders: arms turn around these points
+  const PARTS = [
+    { off: [-0.15, 0.3, 0],  h: [0.14, 0.3, 0.14],   c: "shorts", swing: 1,  pivot: [-0.15, 0.6, 0], leg: true },
+    { off: [0.15, 0.3, 0],   h: [0.14, 0.3, 0.14],   c: "shorts", swing: -1, pivot: [0.15, 0.6, 0],  leg: true },
+    { off: [0, 0.95, 0],     h: [0.32, 0.35, 0.17],  c: "shirt" },
+    { off: [-0.44, 0.95, 0], h: [0.1, 0.33, 0.12],   c: "shirt", swing: -1, pivot: SH_L, arm: "L" },
+    { off: [0.44, 0.95, 0],  h: [0.1, 0.33, 0.12],   c: "shirt", swing: 1,  pivot: SH_R, arm: "R" },
+    { off: [0, 1.55, 0],     h: [0.25, 0.25, 0.25],  c: "skin" },
+    { off: [0, 1.78, 0],     h: [0.26, 0.09, 0.26],  c: "hair" },
+    { off: [-0.1, 1.58, 0.25], h: [0.05, 0.05, 0.02], c: "eye" },
+    { off: [0.1, 1.58, 0.25],  h: [0.05, 0.05, 0.02], c: "eye" },
+    { off: [0, 0.95, -0.25], h: [0.22, 0.25, 0.08],  c: "bag" },
+    { off: [0.56, 0.7, 0.3],  h: [0.03, 0.03, 0.35], c: "cane", swing: 1, pivot: SH_R, arm: "R" },
+    { off: [0.52, 0.7, 0.12], h: [0.09, 0.04, 0.13], c: "book", swing: 1, pivot: SH_R, arm: "R" }
+  ];
+  const SKINS = [[141, 85, 36], [110, 66, 30], [166, 106, 56], [92, 54, 24]];
+  const BAGS = [[200, 40, 40], [40, 90, 200], [230, 170, 30]];
+  function look(shirt, shorts, skin, bag, cane, book) {
+    return { shirt: shirt, shorts: shorts, skin: skin, hair: [25, 20, 20], eye: [10, 10, 10], bag: bag, cane: cane, book: book };
+  }
+
+  // turns one character into world blocks and adds them to a list
+  function addCharacter(list, ch) {
+    for (const part of PARTS) {
+      const color = ch.look[part.c];
+      if (!color) continue;                       // e.g. teachers have no bag
+      if (ch.seated && part.leg) continue;        // sitting people hide their legs
+      let angle = part.swing ? part.swing * Math.sin(ch.t) * 0.6 * ch.sw : 0;   // walking swing
+      if (part.arm === "R" && ch.armR != null) angle = ch.armR;                 // a scripted right arm wins
+      let off = part.off;
+      if (angle !== 0) off = add(part.pivot, rotX(sub(part.off, part.pivot), angle));
+      const w = rotY(off, ch.face);
+      list.push({
+        p: [ch.x + w[0] + (ch.shake ? ch.shake * Math.sin(uiTime * 45) : 0), 0.5 + w[1], ch.z + w[2]],
+        h: part.h, c: color, r: ch.face, rx: angle
+      });
+    }
+  }
+
+  // ---------- 5. INPUT ----------
+  const keys = { up: false, down: false, left: false, right: false };
+  function bindButton(id) {
+    const el = document.getElementById(id);
+    el.addEventListener("pointerdown", (e) => { e.preventDefault(); keys[id] = true; });
+    ["pointerup", "pointerleave", "pointercancel"].forEach((ev) =>
+      el.addEventListener(ev, () => { keys[id] = false; })
+    );
+  }
+  ["up", "down", "left", "right"].forEach(bindButton);
+  const KEYMAP = { ArrowUp: "up", w: "up", ArrowDown: "down", s: "down", ArrowLeft: "left", a: "left", ArrowRight: "right", d: "right" };
+  addEventListener("keydown", (e) => { if (KEYMAP[e.key]) keys[KEYMAP[e.key]] = true; });
+  addEventListener("keyup", (e) => { if (KEYMAP[e.key]) keys[KEYMAP[e.key]] = false; });
+
+  // ---------- 6. MOVEMENT, PLAYER AND NPCs ----------
+  const RADIUS = 0.3;
+  const PLAYER_SPEED = 7; // blocks per SECOND
+  const rand = (a, b) => a + Math.random() * (b - a);
+
+  function free(x, z) {
+    if (x < -11 || x > 11 || z < -11 || z > 11) return false;
+    for (const w of WALLS) {
+      if (x > w.x0 - RADIUS && x < w.x1 + RADIUS && z > w.z0 - RADIUS && z < w.z1 + RADIUS) return false;
+    }
+    return true;
+  }
+
+  // move character ch in direction (dx, dz); returns true if it actually moved
+  function walk(ch, dx, dz, speed, dt) {
+    const len = Math.hypot(dx, dz);
+    if (len === 0) return false;
+    const nx = ch.x + (dx / len) * speed * dt;
+    const nz = ch.z + (dz / len) * speed * dt;
+    let moved = false;
+    const ok = (ch === pl && scene === "class") ? freeRoom : free; // the classroom has its own walls
+    if (ok(nx, ch.z)) { ch.x = nx; moved = true; }
+    if (ok(ch.x, nz)) { ch.z = nz; moved = true; }
+    ch.face = Math.atan2(dx, dz);
+    return moved;
+  }
+
+  // walking animation: t is the swing clock, sw is swing strength (0 to 1)
+  function animate(ch, moving, dt, rate) {
+    if (moving) ch.t += dt * rate;
+    ch.sw = moving ? Math.min(ch.sw + dt * 9, 1) : Math.max(ch.sw - dt * 9, 0);
+  }
+
+  const pl = { x: 0, z: 9.5, face: 0, t: 0, sw: 0, label: "You", tag: [255, 214, 64], look: look([240, 240, 240], [30, 60, 140], SKINS[0], BAGS[0]) };
+
+  function updatePlayer(dt) {
+    if (dialogue) { pl.moving = false; animate(pl, false, dt, 16); return; }
+    if (pl.seated) { pl.moving = false; animate(pl, false, dt, 16); return; }
+    const ix = (keys.right ? 1 : 0) - (keys.left ? 1 : 0);
+    const iz = (keys.down ? 1 : 0) - (keys.up ? 1 : 0);
+    // turn the button direction so that "up" always means "away from the camera"
+    const dx = ix * Math.cos(camYaw) + iz * Math.sin(camYaw);
+    const dz = -ix * Math.sin(camYaw) + iz * Math.cos(camYaw);
+    const moved = walk(pl, dx, dz, PLAYER_SPEED * (energy > 0 ? 1 : 0.5), dt);
+    pl.moving = moved;
+    animate(pl, moved, dt, 16);
+  }
+
+  // NPCs follow the school day. PLAN says what everyone does in each period.
+  const PLAN = {
+    "Arrival": "wander", "Assembly": "assembly",
+    "Class 1": "class", "Class 2": "class", "Break": "wander",
+    "Class 3": "class", "Class 4": "class", "Closing": "home"
+  };
+  const TEACHER_TAG = [150, 230, 170];
+  const STUDENT_INFO = [
+    { name: "Tunde",   subject: "maths",           snack: "puff-puff",    pool: ["lend", "gossip", "timesTable"] },
+    { name: "Amaka",   subject: "English",         snack: "gala",         pool: ["help", "gossip", "timesTable"] },
+    { name: "Chidi",   subject: "Basic Science",   snack: "buns",         pool: ["help", "lend", "gossip"] },
+    { name: "Ibrahim", subject: "Civic Education", snack: "suya",         pool: ["lend", "help", "timesTable"] },
+    { name: "Ngozi",   subject: "Agric Science",   snack: "roasted corn", pool: ["gossip", "help", "timesTable"] },
+    { name: "Femi",    subject: "Government",      snack: "chin chin",    pool: ["lend", "gossip", "help"] },
+    { name: "Hauwa",   subject: "Biology",         snack: "kilishi",      pool: ["help", "timesTable", "gossip"] },
+    { name: "Emeka",   subject: "Economics",       snack: "akara",        pool: ["lend", "timesTable", "help"] }
+  ];
+  const TEACHER_INFO = {
+    principal: {
+      principal: true,
+      pool: ["lecture", "inspect"],
+      carry: "",
+      scold: ["Why are you wandering during class? Is this a market?", "Student, the corridor is not your playground. Go and learn!"]
+    },
+    opon: {
+      pool: ["mathsQuiz", "carry"],
+      carry: "These textbooks are heavier than my salary. Can you carry them to the staff room?",
+      scold: ["Why are you outside during my maths class? Go and solve something!", "x equals trouble, and the trouble is you. Back to class!"]
+    },
+    shukudi: {
+      pool: ["englishQuiz", "carry"],
+      carry: "Please carry these exercise books to the staff room. Gently, o!",
+      scold: ["English does not teach itself. Why are you outside?", "Is this how you speak and behave? Back to class at once!"]
+    },
+    kasala: {
+      pool: ["uniform", "report", "excuse"],
+      carry: "",
+      scold: ["Do you see this cane? It has seen you outside class.", "Class has started. Why is your face still here?"]
+    },
+    bamidele: {
+      pool: ["homeEcQuiz", "carry", "jollof"],
+      carry: "Help me carry these pots to the home economics room. Do not spill my stew!",
+      scold: ["Is this how your mother raised you? Go to class!", "My dear, the kitchen can wait. Your class cannot."]
+    }
+  };
+  const npcs = [];
+  const slots = { student: 0, teacher: 0 };
+
+  function pickTarget(n) {
+    for (let k = 0; k < 20; k++) {
+      const x = rand(-10.5, 10.5), z = rand(-10.5, 10.5);
+      if (free(x, z)) { n.tx = x; n.tz = z; n.giveUp = 8; return; }
+    }
+    n.tx = n.x; n.tz = n.z; n.giveUp = 8;
+  }
+
+  function addNpc(lk, speed, label, tag, kind, patrol, info) {
+    let x = 0, z = 0;
+    do { x = rand(-10.5, 10.5); z = rand(-10.5, 10.5); } while (!free(x, z));
+    const n = {
+      x: x, z: z, face: 0, t: 0, sw: 0, look: lk, label: label, tag: tag, speed: speed,
+      tx: x, tz: z, wait: rand(0, 2), giveUp: 8,
+      kind: kind, patrol: patrol, info: info, last: -1, owes: 0, skipChance: kind === "student" ? 0.2 : 0, slot: slots[kind]++,
+      seenPlan: null, mode: "wander", inside: false, hideAt: "door", talking: false, cool: 0
+    };
+    pickTarget(n);
+    npcs.push(n);
+  }
+
+  for (let k = 0; k < 8; k++)
+    addNpc(look([240, 240, 240], [30, 60, 140], SKINS[k % 4], BAGS[k % 3]), 2.6, STUDENT_INFO[k].name, [255, 255, 255], "student", false, STUDENT_INFO[k]);
+  addNpc(look([60, 140, 90], [50, 50, 60], SKINS[1], null, [190, 140, 70], null), 1.6, "Mr Opon", TEACHER_TAG, "teacher", false, TEACHER_INFO.opon);
+  addNpc(look([220, 120, 50], [50, 50, 60], SKINS[2], null, null, [200, 50, 50]), 1.6, "Mrs Shukudi", TEACHER_TAG, "teacher", false, TEACHER_INFO.shukudi);
+  addNpc(look([150, 60, 70], [50, 50, 60], SKINS[3], null, [190, 140, 70], null), 1.8, "Mr Kasala", TEACHER_TAG, "teacher", true, TEACHER_INFO.kasala);
+  addNpc(look([140, 90, 160], [50, 50, 60], SKINS[0], null, null, [40, 90, 170]), 1.6, "Mrs Bamidele", TEACHER_TAG, "teacher", false, TEACHER_INFO.bamidele);
+  addNpc(look([30, 40, 100], [35, 35, 45], SKINS[1], null, null, null), 1.5, "Principal Okafor", [255, 190, 90], "teacher", false, TEACHER_INFO.principal);
+  // Mama Put stands behind her counter and never moves
+  npcs.push({
+    x: 8.5, z: -4.0, face: 0, t: 0, sw: 0, look: look([230, 180, 60], [120, 50, 40], SKINS[2], null),
+    label: "Mama Put", tag: [255, 214, 120], kind: "vendor", speed: 0, patrol: false, info: {},
+    last: -1, owes: 0, mode: "stay", inside: false, talking: false, cool: 0, seenPlan: null
+  });
+
+  // called once, at the moment the plan changes (for example, the assembly bell)
+  function changePlan(n, plan) {
+    n.mode = plan;
+    if (plan === "class" && (n.patrol || Math.random() < n.skipChance)) n.mode = "wander";
+    if (n.inside) {                       // come back out where we went in
+      n.inside = false;
+      n.x = rand(-0.5, 0.5);
+      n.z = n.hideAt === "gate" ? 10.6 : -3.4;
+    }
+    n.giveUp = 30;
+    if (n.mode === "wander") { pickTarget(n); n.wait = rand(0, 2); }
+    else if (n.mode === "class") { n.tx = rand(-0.5, 0.5); n.tz = -3.4; }
+    else if (n.mode === "home") { n.tx = rand(-1, 1); n.tz = 10.6; }
+    else if (n.mode === "assembly") {
+      if (n.kind === "student") { n.tx = 4 + (n.slot % 3) * 1.6; n.tz = 3 + Math.floor(n.slot / 3) * 1.6; }
+      else if (n.info.principal) { n.tx = 5.6; n.tz = 1.5; }
+      else { n.tx = 9.2; n.tz = 2.5 + n.slot * 1.6; }
+    }
+  }
+
+  function updateNpc(n, dt) {
+    if (n.cool > 0) n.cool -= dt;
+    if (n.talking) { n.face = Math.atan2(pl.x - n.x, pl.z - n.z); animate(n, false, dt, 10); return; }
+    if (n.kind === "vendor") { animate(n, false, dt, 10); return; }
+    if (n.goal) {                          // a scripted order: walk there and wait
+      const sx = n.goal.x - n.x, sz = n.goal.z - n.z;
+      if (Math.hypot(sx, sz) < 0.2) { n.face = n.goal.face; animate(n, false, dt, 10); return; }
+      const went = walk(n, sx, sz, n.speed * 1.5, dt);
+      animate(n, went, dt, 10);
+      return;
+    }
+    const plan = PLAN[clock.period] || "wander";
+    if (plan !== n.seenPlan) { n.seenPlan = plan; changePlan(n, plan); }
+    if (n.inside) return;
+
+    if (n.mode === "wander") {
+      if (n.wait > 0) { n.wait -= dt; animate(n, false, dt, 10); return; }
+      n.giveUp -= dt;
+      const dx = n.tx - n.x, dz = n.tz - n.z;
+      if (Math.hypot(dx, dz) < 0.2 || n.giveUp <= 0) {
+        pickTarget(n);
+        n.wait = rand(1, 3);
+        animate(n, false, dt, 10);
+        return;
+      }
+      const moved = walk(n, dx, dz, n.speed, dt);
+      animate(n, moved, dt, 10);
+      if (!moved) pickTarget(n);
+      return;
+    }
+
+    // class, home, assembly: go to the spot, then do the arrival thing
+    n.giveUp -= dt;
+    const gx = n.tx - n.x, gz = n.tz - n.z;
+    if (Math.hypot(gx, gz) < 0.25 || n.giveUp <= 0) {
+      n.x = n.tx; n.z = n.tz;
+      if (n.mode === "class" || n.mode === "home") {
+        n.inside = true;
+        n.hideAt = n.mode === "home" ? "gate" : "door";
+      } else {
+        if (n.lookAt) n.face = Math.atan2(n.lookAt.x - n.x, n.lookAt.z - n.z);
+        else n.face = n.info.principal ? 0 : n.kind === "student" ? Math.PI : -Math.PI / 2;
+      }
+      animate(n, false, dt, 10);
+      return;
+    }
+    const moved2 = walk(n, gx, gz, n.speed, dt);
+    animate(n, moved2, dt, 10);
+  }
+
+  // ---------- 8. SCHOOL CLOCK ----------
+  // times are "minutes since midnight": 450 = 7:30 AM, 780 = 1:00 PM
+  const SCHEDULE = [
+    { at: 450, name: "Arrival" },
+    { at: 480, name: "Assembly" },
+    { at: 540, name: "Class 1" },
+    { at: 600, name: "Class 2" },
+    { at: 660, name: "Break" },
+    { at: 690, name: "Class 3" },
+    { at: 750, name: "Class 4" },
+    { at: 810, name: "Closing" }
+  ];
+  const DAY_START = 450, DAY_END = 870;
+  const MINUTES_PER_SECOND = 1; // game minutes that pass per real second
+  const clock = { min: DAY_START, day: 1, period: "", bell: 0 };
+  const hud = document.getElementById("hud");
+
+  function fmt(min) {
+    const h = Math.floor(min / 60);
+    const m = Math.floor(min % 60);
+    return ((h % 12) || 12) + ":" + (m < 10 ? "0" : "") + m + (h < 12 ? " AM" : " PM");
+  }
+
+  function updateClock(dt) {
+    clock.min += dt * MINUTES_PER_SECOND;
+    if (clock.min >= DAY_END) { clock.min = DAY_START; clock.day += 1; }
+    let name = SCHEDULE[0].name;
+    for (const p of SCHEDULE) if (clock.min >= p.at) name = p.name;
+    if (name !== clock.period) { clock.period = name; clock.bell = 3; }
+    clock.bell = Math.max(clock.bell - dt, 0);
+    const text = (clock.bell > 0 ? "🔔 " : "") + "Day " + clock.day + " · " + fmt(clock.min) + " · " + clock.period;
+    if (hud.textContent !== text) hud.textContent = text;
+  }
+
+  // ---------- 9. MONEY AND TALKING ----------
+  let money = 0;
+  let floaters = [];
+  const cashEl = document.getElementById("cash");
+  try { money = Number(localStorage.getItem("naijaHighMoney")) || 0; } catch (e) { money = 0; }
+  cashEl.textContent = "₦" + money;
+
+  function addMoney(delta) {
+    const before = money;
+    money = Math.max(0, money + delta);
+    const real = money - before;
+    cashEl.textContent = "₦" + money;
+    try { localStorage.setItem("naijaHighMoney", String(money)); } catch (e) { /* saving is optional */ }
+    if (real !== 0) {
+      floaters.push({ text: (real > 0 ? "+" : "-") + "₦" + Math.abs(real), color: real > 0 ? "120,255,140" : "255,120,120", life: 1.6 });
+    }
+  }
+
+  const talkBtn = document.getElementById("talk");
+  const padEl = document.getElementById("pad");
+  const dlg = document.getElementById("dlg");
+  const TALK_DISTANCE = 2.2;
+  let dialogue = null; // the NPC we are talking to, or null
+  let nearNpc = null;  // the NPC close enough to talk to, or null
+
+  function showLine(name, text, choices) {
+    document.getElementById("dname").textContent = name;
+    document.getElementById("dtext").textContent = text;
+    const box = document.getElementById("dchoices");
+    box.textContent = "";
+    for (const c of choices) {
+      const b = document.createElement("button");
+      b.textContent = c.text;
+      b.addEventListener("click", () => pick(c));
+      box.appendChild(b);
+    }
+  }
+
+  function pick(c) {
+    if (c.menu) { const sc = SCENARIOS.shop(dialogue); showLine(dialogue.label, sc.line, sc.choices); return; }
+    if (c.buy) {
+      if (money >= c.buy.price) {
+        addMoney(-c.buy.price);
+        addEnergy(c.buy.energy);
+        showLine(dialogue.label, c.buy.reply, [{ text: "Buy more", menu: true }, { text: "Leave" }]);
+      } else {
+        showLine(dialogue.label, "Eh, your money no reach.", [{ text: "Back", menu: true }, { text: "Leave" }]);
+      }
+      return;
+    }
+    if (c.gain) addMoney(c.gain);
+    if (c.owe) dialogue.owes = 80;
+    if (c.repay) dialogue.owes = 0;
+    if (c.reply) showLine(dialogue.label, c.reply, [{ text: "OK" }]);
+    else closeDialogue();
+  }
+
+  // ----- dialogue content -----
+  const pickOne = (list) => list[Math.floor(Math.random() * list.length)];
+  const int = (a, b) => Math.floor(rand(a, b + 1)); // whole number from a to b
+  function shuffle(list) {
+    for (let i = list.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const tmp = list[i]; list[i] = list[j]; list[j] = tmp;
+    }
+    return list;
+  }
+
+  function quizScenario(question, correct, wrongs, reward) {
+    const options = shuffle([correct].concat(wrongs));
+    return {
+      line: question,
+      choices: options.map((o) => o === correct
+        ? { text: String(o), gain: reward, reply: "Correct! Well done." }
+        : { text: String(o), reply: "No o. The answer is " + correct + ". Go and read!" })
+    };
+  }
+
+  const GOSSIP = [
+    { l: "You heard? Mr Kasala caught three people hiding behind the toilet during assembly!", r: "Imagine! The cane did not rest that day." },
+    { l: "They say the canteen will add free meat to the jollof on Friday.", r: "Na lie! But I go dey hope." },
+    { l: "Mrs Shukudi's wig fell off during English class yesterday. I nearly died!", r: "Please don't tell her I told you!" },
+    { l: "Somebody wrote 'x equals trouble' on Mr Opon's board and he is looking for the culprit.", r: "It was not me. I swear." }
+  ];
+  const ENGLISH = [
+    { q: "Complete the proverb: A stitch in time saves ___", a: "nine", w: ["ten", "a shirt"] },
+    { q: "What is the opposite of 'generous'?", a: "stingy", w: ["kind", "wealthy"] },
+    { q: "Which of these is a proper noun?", a: "Lagos", w: ["city", "river"] },
+    { q: "What is the plural of 'child'?", a: "children", w: ["childs", "childrens"] },
+    { q: "Which word is a verb?", a: "dance", w: ["table", "green"] },
+    { q: "What is the past tense of 'go'?", a: "went", w: ["goed", "gone"] }
+  ];
+  const HOME_EC = [
+    { q: "Which nutrient builds the body?", a: "Protein", w: ["Sugar", "Salt"] },
+    { q: "What must you do before you cook?", a: "Wash your hands", w: ["Wear shoes", "Open the window"] },
+    { q: "Which food gives the most energy?", a: "Yam", w: ["Pepper", "Water"] },
+    { q: "Which tool measures liquid in cooking?", a: "A measuring jug", w: ["A frying pan", "A ladle"] },
+    { q: "What keeps food from spoiling?", a: "A refrigerator", w: ["A radio", "A mat"] }
+  ];
+
+  const SCENARIOS = {
+    lecture: () => ({
+      line: pickOne(["Student, punctuality is the soul of success.", "Reading is the key. Have you read today?", "A good name is better than money. Remember that."]),
+      choices: [{ text: "Yes, sir", reply: "Good. Carry on." }, { text: "Noted, sir", reply: "Noted is not enough. Practise!" }]
+    }),
+    inspect: () => ({
+      line: "Show me your school ID card.",
+      choices: [{ text: "Here, sir", reply: "Hmm. Acceptable." }, { text: "I forgot it, sir", reply: "Forgot? Then forget your break time!" }]
+    }),
+    shop: () => ({
+      line: "Welcome, my dear! Hot food just came out. What will you chop today?",
+      choices: [
+        { text: "Pure water · ₦20 (+8 energy)", buy: { price: 20, energy: 8, reply: "Cold and clean!" } },
+        { text: "Puff-puff · ₦50 (+20 energy)", buy: { price: 50, energy: 20, reply: "Hot and sweet. Enjoy!" } },
+        { text: "Jollof rice · ₦150 (+50 energy)", buy: { price: 150, energy: 50, reply: "Eat well, my pikin!" } },
+        { text: "Leave" }
+      ]
+    }),
+    help: (n) => ({
+      line: "Abeg, can you help me with this " + n.info.subject + " assignment? It is due today!",
+      choices: [
+        { text: "Help (+₦100)", gain: 100, reply: "Thank you! You're a lifesaver." },
+        { text: "Not now", reply: "Ah, okay o." }
+      ]
+    }),
+    lend: (n) => ({
+      line: "Guy, I never chop since morning. Abeg, lend me ₦50 for " + n.info.snack + ".",
+      choices: (money >= 50 ? [{ text: "Give ₦50", gain: -50, owe: true, reply: "You're a real one! I go pay you back." }] : [])
+        .concat([{ text: "I'm broke too", reply: "Ah. Na so life be." }])
+    }),
+    gossip: () => {
+      const g = pickOne(GOSSIP);
+      return { line: g.l, choices: [{ text: "Haba! Tell me more", reply: g.r }, { text: "Not my business", reply: "Okay o, mind your business." }] };
+    },
+    timesTable: () => {
+      const a = int(6, 9), b = int(6, 9);
+      return quizScenario("Quick! What is " + a + " × " + b + "? Mr Opon dey come!", a * b, [a * b - a, a * b + b], 50);
+    },
+    mathsQuiz: () => {
+      const m = int(2, 5), x = int(2, 9), c = int(1, 9);
+      return quizScenario("Solve for me: if " + m + "x + " + c + " = " + (m * x + c) + ", what is x?", x, [x + 1, x + 2], 150);
+    },
+    englishQuiz: () => { const q = pickOne(ENGLISH); return quizScenario(q.q, q.a, q.w, 150); },
+    homeEcQuiz: () => { const q = pickOne(HOME_EC); return quizScenario(q.q, q.a, q.w, 150); },
+    carry: (n) => ({
+      line: n.info.carry,
+      choices: [{ text: "Carry them (+₦150)", gain: 150, reply: "God bless you." }, { text: "Not now", reply: "Hmm, very well." }]
+    }),
+    uniform: () => ({
+      line: "Is that how you tuck your shirt? Fix yourself!",
+      choices: [{ text: "Yes, sir", reply: "Hmm. I will be watching you." }, { text: "It is the style, sir", reply: "STYLE? Is this a fashion show?" }]
+    }),
+    report: () => ({
+      line: "Have you seen any student hiding outside during class? Report them to me.",
+      choices: [{ text: "Report one (+₦100)", gain: 100, reply: "Good. Discipline is key. I will handle it." }, { text: "I saw no one, sir", reply: "Hmm. Is that so?" }]
+    }),
+    excuse: () => ({
+      line: "You were late this morning. Give me one good reason.",
+      choices: [
+        { text: "Traffic, sir", reply: "Traffic? On a footpath? Hmm." },
+        { text: "NEPA took light, sir", reply: "And your alarm clock is powered by NEPA?" },
+        { text: "I overslept, sir", reply: "At least you are honest. Do not repeat it." }
+      ]
+    }),
+    jollof: () => ({
+      line: "Taste my jollof for the school fair. Be honest. Rate it out of ten.",
+      choices: [{ text: "10 out of 10 (+₦50)", gain: 50, reply: "I knew it! Small small chops for you." }, { text: "7 out of 10", reply: "Only seven? Your mouth is spoiled." }]
+    })
+  };
+
+  function incidentGossip(n) {
+    const name = incident.culprit.label;
+    if (n === incident.culprit) {
+      return { line: "Abeg, no talk about that thing. My palm still dey pain.",
+               choices: [{ text: "Sorry o", reply: "Na life." }, { text: "Show me the palm", reply: "Go away!" }] };
+    }
+    return {
+      line: pickOne([
+        "Did you see how " + name + " was jumping? Six strokes o!",
+        "Principal Okafor said twelve next time. Twelve! I no go talk for assembly again.",
+        "Mr Kasala's cane has not had a quiet morning."
+      ]),
+      choices: [{ text: "I saw it!", reply: "Wahala! Sit down and behave." }, { text: "Poor " + name, reply: "Na so e be. Discipline dey cost." }]
+    };
+  }
+
+  // decide what this person says right now
+  function chooseScenario(n) {
+    if (n.kind === "vendor") return SCENARIOS.shop(n);
+    const sir = n.label.startsWith("Mr ") ? "sir" : "ma";
+    const inClass = PLAN[clock.period] === "class";
+    if (n.cool > 0) {
+      return { line: pickOne(["Eh, we just spoke. Go and do something.", "Again? Let me breathe small.", "I have said my own. Go on."]), choices: [{ text: "OK" }] };
+    }
+    if (n.owes > 0) {
+      return { line: "Oga! Remember the ₦50 you gave me? Here is ₦" + n.owes + ". Thank you!", choices: [{ text: "Collect ₦" + n.owes, gain: n.owes, repay: true, reply: "God bless you!" }] };
+    }
+    if (n.inRoom) {                         // sitting in the classroom with you
+      if (n.kind === "teacher") return SCENARIOS[n.info.pool[0]](n);   // answer a question in class
+      return { line: pickOne(["Shhh! The teacher is looking.", "Not now, I'm taking notes!", "Psst... did you do the assignment?"]), choices: [{ text: "OK" }] };
+    }
+    if (inClass && n.mode === "class") {
+      return { line: n.kind === "student" ? "Sorry o, I'm late for class!" : "I am on my way to class. Move along.", choices: [{ text: "OK" }] };
+    }
+    if (inClass && n.kind === "student") {
+      return { line: "Shhh! Don't tell Mr Kasala I'm outside o. I go give you ₦100.", choices: [
+        { text: "Take ₦100", gain: 100, reply: "We dey together!" },
+        { text: "I will tell him", reply: "Ehn? You no fit do me like that!" }
+      ] };
+    }
+    if (inClass) {
+      return { line: pickOne(n.info.scold), choices: [
+        { text: "Sorry, " + sir + " (-₦50)", gain: -50, reply: pickOne(["Hmm. Don't let me meet you here again.", "Next time it will be the cane."]) },
+        { text: "Yes, " + sir }
+      ] };
+    }
+    if (incident && n.kind === "student" && Math.random() < 0.6) return incidentGossip(n);
+    let i;
+    do { i = Math.floor(Math.random() * n.info.pool.length); } while (i === n.last && n.info.pool.length > 1);
+    n.last = i;
+    return SCENARIOS[n.info.pool[i]](n);
+  }
+
+  function openDialogue(n) {
+    dialogue = n;
+    n.talking = true;
+    keys.up = keys.down = keys.left = keys.right = false;
+    dlg.style.display = "block";
+    padEl.style.display = "none";
+    talkBtn.style.display = "none";
+    const sc = chooseScenario(n);
+    showLine(n.label, sc.line, sc.choices);
+  }
+
+  function closeDialogue() {
+    dialogue.talking = false;
+    dialogue.cool = 20;
+    dialogue = null;
+    dlg.style.display = "none";
+    padEl.style.display = "grid";
+  }
+
+  talkBtn.addEventListener("click", () => {
+    if (nearNpc) openDialogue(nearNpc);
+    else if (nearDoor) enterRoom();
+  });
+
+  function updateInteract() {
+    nearNpc = null;
+    if (!dialogue) {
+      let best = TALK_DISTANCE;
+      for (const n of npcs) {
+        if (!visibleHere(n)) continue;
+        const d = Math.hypot(n.x - pl.x, n.z - pl.z);
+        if (d < best) { best = d; nearNpc = n; }
+      }
+    }
+    nearDoor = false;
+    if (!dialogue && scene === "outside") {
+      const dDoor = Math.hypot(pl.x - DOOR_OUT.x, pl.z - DOOR_OUT.z);
+      nearDoor = dDoor < 1.6 && (!nearNpc || dDoor < 1.0);   // standing right at the door, the door wins
+      if (nearDoor) nearNpc = null;
+    }
+    const show = (nearNpc || nearDoor) && !lesson ? "block" : "none";
+    if (talkBtn.style.display !== show) talkBtn.style.display = show;
+    const text = nearNpc ? (nearNpc.kind === "vendor" ? "Buy food 🍲" : "Talk to " + nearNpc.label)
+               : nearDoor ? "Enter classroom 🚪" : "";
+    if (talkBtn.textContent !== text) talkBtn.textContent = text;
+
+    // the green button: sit down / stand up
+    nearSeat = null;
+    if (scene === "class" && !pl.seated && !dialogue && !lesson) {
+      const f = nearestFreeSeat();
+      nearSeat = f ? f.id : null;
+    }
+    const actShow = !dialogue && !lesson && scene === "class" && (pl.seated || nearSeat !== null) ? "block" : "none";
+    if (actBtn.style.display !== actShow) actBtn.style.display = actShow;
+    const actText = pl.seated ? "Stand up 🪑" : "Sit down 🪑";
+    if (actBtn.textContent !== actText) actBtn.textContent = actText;
+
+    // the walking pad is hidden whenever you cannot walk
+    const padWanted = dialogue || lesson || pl.seated ? "none" : "grid";
+    if (padEl.style.display !== padWanted) padEl.style.display = padWanted;
+  }
+
+  // ---------- 10. ENERGY ----------
+  let energy = 100;
+  const energyFill = document.getElementById("efill");
+  let shownEnergy = -1;
+
+  function addEnergy(d) {
+    const before = energy;
+    energy = Math.min(100, Math.max(0, energy + d));
+    const real = Math.round(energy - before);
+    if (real > 0) floaters.push({ text: "+" + real + " ⚡", color: "255,214,64", life: 1.6 });
+  }
+
+  function updateEnergy(dt) {
+    energy = Math.max(0, energy - dt * (0.15 + (pl.moving ? 0.25 : 0)));
+    if (pl.seated && !lesson) energy = Math.min(100, energy + dt * 1.0);   // resting at a desk
+    const pct = Math.round(energy);
+    if (pct !== shownEnergy) {
+      shownEnergy = pct;
+      energyFill.style.width = pct + "%";
+      energyFill.style.background = pct > 40 ? "#4caf50" : pct > 15 ? "#f5b800" : "#e53935";
+    }
+  }
+
+  // ---------- 11. THE ASSEMBLY SHOW ----------
+  // A scripted scene: a timeline of events that runs during the Assembly period.
+  let uiTime = 0;       // seconds since the game started (used for shaking)
+  let incident = null;  // set after the show: { culprit }
+  let show = null;      // the show currently playing, or null
+
+  const MURMURS = ["psst...", "hehe", "*whispers*", "see Mr Opon's shoe", "he he he"];
+  const OUCH = ["Ah!", "Ouch!", "Sorry sir!", "Mummy!", "Ah-ah!", "Ehh!"];
+  const REACT = ["😂", "🤭", "Ehen!", "Haba!", "Oya!", "Chai!"];
+  const POST_LINES = ["NAME got six strokes!", "Chai! Did you see that?", "The cane no be play.", "I almost laughed o!", "Principal Okafor is fierce!"];
+
+  function say(n, text, secs) { n.bubble = { text: text, life: secs }; }
+  function swapCanes(a, b) { const c = a.look.cane; a.look.cane = b.look.cane; b.look.cane = c; }
+  function crowd(s, k) { return shuffle(s.students.filter((n) => n !== s.culprit)).slice(0, k); }
+  const KASALA_SPOT = { x: 6.9, z: 1.8, face: -1.8 }; // beside the principal, facing him
+
+  const SCRIPT = [
+    { at: 8,    run: (s) => say(s.principal, "Good morning, students!", 3) },
+    { at: 9.5,  run: (s) => crowd(s, 3).forEach((n) => say(n, "Good morning, sir!", 2.5)) },
+    { at: 13,   run: (s) => say(s.principal, "Today: punctuality and discipline.", 4) },
+    { at: 19,   run: (s) => say(s.culprit, "hehe... psst", 3) },
+    { at: 22,   run: (s) => { say(s.principal, "WHO IS TALKING?!", 3); s.principal.lookAt = s.culprit; } },
+    { at: 25,   run: (s) => { say(s.principal, "YOU! Come out here!", 3); s.culprit.goal = { x: 5.6, z: 2.7, face: Math.PI }; } },
+    { at: 26.5, run: (s) => say(s.culprit, "Me, sir??", 2) },
+    { at: 29,   run: (s) => { say(s.principal, "Mr Kasala, your cane.", 3); s.kasala.goal = KASALA_SPOT; } },
+    { at: 34,   run: (s) => { swapCanes(s.kasala, s.principal); say(s.kasala, "Yes, sir.", 2); say(s.principal, "Hold out your hand.", 3); s.kasala.goal = null; } },
+    { at: 45,   run: (s) => { say(s.principal, "Next time it will be twelve!", 3.5); s.culprit.goal = null; s.principal.lookAt = null; } },
+    { at: 46,   run: (s) => say(s.culprit, "*rubbing hand*", 3) },
+    { at: 47,   run: (s) => { say(s.principal, "Mr Kasala, collect it.", 3); s.kasala.goal = KASALA_SPOT; } },
+    { at: 51,   run: (s) => { swapCanes(s.kasala, s.principal); s.kasala.goal = null; } },
+    { at: 52,   run: (s) => say(s.principal, "Dismissed! Go to your classes!", 4) }
+  ];
+  for (let k = 0; k < 6; k++) {            // six strokes, one per second
+    SCRIPT.push({ at: 37 + k, run: (s) => {
+      say(s.principal, "WHACK!", 0.9);
+      say(s.culprit, pickOne(OUCH), 0.9);
+      crowd(s, 2).forEach((n) => say(n, pickOne(REACT), 1.2));
+    } });
+  }
+  SCRIPT.sort((a, b) => a.at - b.at);
+
+  function startAssembly() {
+    const students = npcs.filter((n) => n.kind === "student" && !n.inside);
+    show = {
+      t: 0, next: 0, phase: "show", murmurAt: 17, postT: 0, gossipAt: 0,
+      students: students, culprit: pickOne(students),
+      principal: npcs.find((n) => n.info.principal),
+      kasala: npcs.find((n) => n.label === "Mr Kasala")
+    };
+    incident = null;
+  }
+
+  function endShow() {
+    for (const n of npcs) { n.goal = null; n.lookAt = null; n.shake = 0; n.armR = null; }
+    if (show.principal.look.cane) swapCanes(show.principal, show.kasala); // cane goes back to Mr Kasala
+    incident = { culprit: show.culprit };
+    show.phase = "post";
+    show.postT = 7;
+    show.gossipAt = 0.5;
+  }
+
+  function updateDirector(dt) {
+    uiTime += dt;
+    const inAssembly = clock.period === "Assembly";
+    if (inAssembly && !show) startAssembly();
+    if (!show) return;
+
+    if (show.phase === "show") {
+      show.t += dt;
+      while (show.next < SCRIPT.length && SCRIPT[show.next].at <= show.t) SCRIPT[show.next++].run(show);
+      if (show.t >= show.murmurAt && show.t < 50) {
+        if (show.t < 36 || show.t > 44) {   // pause the murmuring during the strokes
+          const talker = show.t > 21 ? crowd(show, 1)[0] : pickOne(show.students); // after he is caught, someone else murmurs
+          say(talker, pickOne(MURMURS), 2.2);
+        }
+        show.murmurAt = show.t + rand(1.5, 3);
+      }
+      const swinging = show.t >= 36.35 && show.t < 42.3;
+      let flinch = false;
+      if (swinging) {
+        const p = (show.t - 36.35) % 1;          // where we are in one stroke: 0 to 1
+        show.principal.armR = p < 0.5 ? -0.2 - 4.8 * p       // wind up: raise the arm
+                            : p < 0.65 ? -2.6 + 16 * (p - 0.5) // WHACK: bring it down fast
+                            : -0.2;                            // hold at the bottom
+        show.principal.sw = 0;                                 // feet stay still
+        flinch = p > 0.62 && p < 0.9;
+      } else {
+        show.principal.armR = null;
+      }
+      show.culprit.armR = (show.t >= 34 && show.t < 45) ? -1.4 : null; // holding out a hand
+      show.culprit.shake = flinch ? 0.06 : 0;
+      if (!inAssembly) endShow();
+    } else {
+      show.postT -= dt;
+      show.gossipAt -= dt;
+      if (show.gossipAt <= 0) {
+        say(crowd(show, 1)[0], pickOne(POST_LINES).replace("NAME", show.culprit.label), 2.5);
+        show.gossipAt = rand(0.8, 1.4);
+      }
+      if (show.postT <= 0) show = null;
+    }
+  }
+
+  // ---------- 12. CAMERA ----------
+  let camYaw = 0;       // turning the camera around you
+  let camHeight = 9;    // how high it floats
+  let camZoom = 1.5;    // 1 = original view; higher = closer. We start a little zoomed in.
+  const hintEl = document.getElementById("hint");
+  let hintTimer = null;
+  function flashHint(text, ms) {
+    hintEl.textContent = text;
+    hintEl.style.opacity = "1";
+    clearTimeout(hintTimer);
+    hintTimer = setTimeout(() => { hintEl.style.opacity = "0"; }, ms || 4500);
+  }
+  flashHint("Drag to look around · pinch or +/− to zoom", 8000);
+
+  const pointers = new Map(); // every finger touching the screen
+  let pinch = null;           // set while two fingers are down
+
+  cv.addEventListener("pointerdown", (e) => {
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    try { cv.setPointerCapture(e.pointerId); } catch (err) { /* fine */ }
+    hintEl.style.opacity = "0";
+    if (pointers.size === 2) {
+      const [a, b] = [...pointers.values()];
+      pinch = { dist: Math.hypot(a.x - b.x, a.y - b.y), zoom: camZoom };
+    }
+  });
+  cv.addEventListener("pointermove", (e) => {
+    const p = pointers.get(e.pointerId);
+    if (!p) return;
+    if (pointers.size === 1) {                       // one finger: look around
+      camYaw -= (e.clientX - p.x) * 0.008;
+      camHeight = Math.min(16, Math.max(5, camHeight + (e.clientY - p.y) * 0.03));
+    }
+    p.x = e.clientX;
+    p.y = e.clientY;
+    if (pointers.size === 2 && pinch) {              // two fingers: zoom
+      const [a, b] = [...pointers.values()];
+      const d = Math.hypot(a.x - b.x, a.y - b.y);
+      camZoom = Math.min(3, Math.max(0.8, pinch.zoom * d / pinch.dist));
+    }
+  });
+  const letGo = (e) => { pointers.delete(e.pointerId); pinch = null; };
+  ["pointerup", "pointercancel"].forEach((ev) => cv.addEventListener(ev, letGo));
+  document.getElementById("zin").addEventListener("click", () => { camZoom = Math.min(3, camZoom * 1.2); });
+  document.getElementById("zout").addEventListener("click", () => { camZoom = Math.max(0.8, camZoom / 1.2); });
+
+  // ---------- 13. THE CLASSROOM ----------
+  let scene = "outside";   // "outside" or "class": which place the player is in
+  let nearDoor = false;
+  const DOOR_OUT = { x: 0, z: -3.4 };   // just outside the classroom door
+
+  const room = [];        // solid pieces of the classroom
+  const roomWalls = [];   // rectangles you cannot walk through
+  const roomTiles = [];   // the floor
+  // rbox works like box(): y is the height above the floor.
+  // cut = [nx, nz, limit]: hide this piece when the camera is beyond that wall, so we can always see in.
+  function rbox(x, y, z, hx, hy, hz, c, cut) { room.push({ p: [x, 0.5 + y, z], h: [hx, hy, hz], r: 0, c: c, cut: cut }); }
+
+  const CREAM = [245, 235, 200], WOOD = [150, 100, 55], DARKWOOD = [110, 75, 40];
+  for (let i = -5; i < 5; i++)
+    for (let j = -3; j < 3; j++)
+      roomTiles.push({ i: i, j: j, c: (i + j) % 2 === 0 ? [196, 164, 120] : [186, 154, 110] });
+
+  for (let x = -4; x <= 4; x += 2) rbox(x, 1.5, -3.1, 1, 1.5, 0.1, CREAM, [0, -1, 3]);          // back wall
+  for (const x of [-4, -2, 2, 4]) rbox(x, 1.5, 3.1, 1, 1.5, 0.1, CREAM, [0, 1, 3]);              // front wall, door gap in the middle
+  rbox(0, 2.6, 3.1, 1, 0.4, 0.1, CREAM, [0, 1, 3]);                                              // above the door
+  rbox(-1, 1.1, 3.1, 0.08, 1.1, 0.12, DARKWOOD, [0, 1, 3]);                                      // door frame
+  rbox(1, 1.1, 3.1, 0.08, 1.1, 0.12, DARKWOOD, [0, 1, 3]);
+  for (const z of [-2, 0, 2]) {                                                                  // side walls
+    rbox(-5.1, 1.5, z, 0.1, 1.5, 1, CREAM, [-1, 0, 5]);
+    rbox(5.1, 1.5, z, 0.1, 1.5, 1, CREAM, [1, 0, 5]);
+  }
+  rbox(0, 1.6, -2.95, 2.2, 0.6, 0.03, [25, 60, 45], [0, -1, 3]);                                 // blackboard
+  rbox(-0.9, 1.95, -2.9, 0.7, 0.02, 0.01, [235, 235, 235], [0, -1, 3]);                          // chalk writing
+  rbox(-0.6, 1.65, -2.9, 1.0, 0.02, 0.01, [235, 235, 235], [0, -1, 3]);
+  rbox(-1.0, 1.35, -2.9, 0.5, 0.02, 0.01, [235, 235, 235], [0, -1, 3]);
+  rbox(0, 0.45, -2.0, 0.9, 0.45, 0.4, WOOD);                                                     // teacher's desk
+  rbox(-0.4, 0.94, -2.0, 0.2, 0.04, 0.15, [200, 50, 50]);                                        // a book on it
+  roomWalls.push({ x0: -0.9, x1: 0.9, z0: -2.4, z1: -1.6 });
+  roomWalls.push({ x0: -5.2, x1: -1.0, z0: 3.0, z1: 3.2 });
+  roomWalls.push({ x0: 1.0, x1: 5.2, z0: 3.0, z1: 3.2 });
+
+  const DESK_X = [-3.9, -1.3, 1.3, 3.9], DESK_Z = [0.2, 1.8];
+  for (const dz of DESK_Z) {
+    for (const dx of DESK_X) {
+      rbox(dx, 0.75, dz, 0.55, 0.05, 0.4, WOOD);                    // desk top
+      rbox(dx, 0.37, dz, 0.5, 0.37, 0.3, DARKWOOD);                 // desk body
+      rbox(dx, 0.3, dz + 0.75, 0.3, 0.3, 0.25, [60, 110, 190]);     // chair
+      roomWalls.push({ x0: dx - 0.55, x1: dx + 0.55, z0: dz - 0.4, z1: dz + 1.0 });
+    }
+  }
+
+  function freeRoom(x, z) {
+    if (x < -4.7 || x > 4.7 || z < -2.6 || z > 3.4) return false;
+    for (const w of roomWalls) {
+      if (x > w.x0 - RADIUS && x < w.x1 + RADIUS && z > w.z0 - RADIUS && z < w.z1 + RADIUS) return false;
+    }
+    return true;
+  }
+
+  const visibleHere = (n) => scene === "outside" ? !n.inside : !!n.inRoom;
+
+  const CLASS_TEACHER = { "Class 1": "Mr Opon", "Class 2": "Mrs Shukudi", "Class 3": "Mrs Bamidele", "Class 4": "Mr Opon" };
+  const LECTURE = {
+    "Mr Opon": ["Open your books to page 42.", "x plus x is 2x. Who sees it?", "Silence! Maths needs concentration."],
+    "Mrs Shukudi": ["Today we study the noun.", "Spell 'necessary' for me.", "Who can use 'whom' correctly?"],
+    "Mrs Bamidele": ["Wash your hands before cooking!", "Today: how to make stew.", "Protein builds the body."]
+  };
+
+  function seatFor(n) {
+    if (n.kind === "student") {
+      return { x: DESK_X[n.slot % 4], z: DESK_Z[Math.floor(n.slot / 4) % 2] + 0.75, face: Math.PI, seated: true };
+    }
+    return { x: 0, z: -1.2, face: 0, seated: false };   // the teacher stands at the front, facing the class
+  }
+
+  // who is in the room right now: students and teachers who walked in for class
+  function syncRoom() {
+    for (const n of npcs) {
+      const inClass = n.inside && n.hideAt === "door" && n.mode === "class";
+      const wanted = n.kind === "student" ? inClass : inClass && n.label === CLASS_TEACHER[clock.period];
+      if (wanted && !n.inRoom) {
+        const sp = seatFor(n);
+        n.x = sp.x; n.z = sp.z; n.face = sp.face; n.seated = sp.seated; n.inRoom = true;
+      } else if (!wanted && n.inRoom) {
+        n.inRoom = false;
+        n.seated = false;
+      }
+    }
+  }
+
+  let roomTimer = 0;
+  function updateRoom(dt) {
+    if (scene !== "class") return;
+    if (pl.z > 2.9 && Math.abs(pl.x) < 1) { leaveRoom(); return; }   // walked out through the door
+    syncRoom();
+    if (pl.seated && !lesson && seatTaken(pl.seatId)) { standUp(); flashHint("That seat belongs to someone else!", 3000); }
+    if (pl.seated && !lesson && !done[doneKey()]) {
+      const t0 = npcs.find((n) => n.inRoom && n.kind === "teacher");
+      if (t0) startLesson(t0);                          // sat down in class: the quiz begins
+    }
+    roomTimer -= dt;
+    if (roomTimer > 0) return;
+    roomTimer = rand(4, 7);
+    const teacher = npcs.find((n) => n.inRoom && n.kind === "teacher");
+    const kids = npcs.filter((n) => n.inRoom && n.kind === "student");
+    if (teacher && LECTURE[teacher.label] && Math.random() < 0.6) say(teacher, pickOne(LECTURE[teacher.label]), 3.5);
+    else if (kids.length) say(pickOne(kids), pickOne(["Yes ma!", "Yes sir!", "🤭", "...", "Ehen?"]), 2);
+  }
+
+// ---------- 14. ATTENDING CLASS ----------
+  const actBtn = document.getElementById("act");
+  let nearSeat = null;
+  let lesson = null;                 // the quiz in progress, or null
+  const done = {};                   // lessons already taken: "day|period" -> true
+  const doneKey = () => clock.day + "|" + clock.period;
+  const QUESTIONS = 4, QUESTION_TIME = 12;
+  const SUBJECT_QUIZ = { "Mr Opon": ["mathsQuiz"], "Mrs Shukudi": ["englishQuiz"], "Mrs Bamidele": ["homeEcQuiz"] };
+  let lessonsTotal = 0;
+  try { lessonsTotal = Number(localStorage.getItem("naijaHighLessons")) || 0; } catch (e) { lessonsTotal = 0; }
+
+  // seats 0-7: id = row * 4 + column. Students use the same numbering through their slot.
+  const AISLES = [-2.6, 0, 2.6];
+  const seatId = (n) => (Math.floor(n.slot / 4) % 2) * 4 + (n.slot % 4);
+  const seatPos = (id) => ({ x: DESK_X[id % 4], z: DESK_Z[Math.floor(id / 4)] + 0.75 });
+  // a seat is "taken" if a student who is attending class owns it (even if still walking in)
+  function seatTaken(id) { return npcs.some((n) => n.kind === "student" && n.mode === "class" && seatId(n) === id); }
+  function nearestFreeSeat() {
+    let best = null;
+    for (let id = 0; id < 8; id++) {
+      if (seatTaken(id)) continue;
+      const p = seatPos(id);
+      const d = Math.hypot(p.x - pl.x, p.z - pl.z);
+      if (d < 1.6 && (!best || d < best.d)) best = { id: id, d: d };
+    }
+    return best;
+  }
+  function sit(id) {
+    const p = seatPos(id);
+    pl.x = p.x; pl.z = p.z; pl.face = Math.PI; pl.seated = true; pl.seatId = id;
+    if (!npcs.some((n) => n.inRoom && n.kind === "teacher")) flashHint("You sit and rest. Your energy comes back slowly.", 3500);
+  }
+  function standUp() {
+    const p = seatPos(pl.seatId);
+    let aisle = AISLES[0];
+    for (const a of AISLES) if (Math.abs(a - p.x) < Math.abs(aisle - p.x)) aisle = a;
+    pl.x = aisle; pl.z = p.z; pl.seated = false;   // step out into the nearest aisle
+  }
+  actBtn.addEventListener("click", () => {
+    if (pl.seated) standUp();
+    else if (nearSeat !== null) sit(nearSeat);
+  });
+
+  // the question panel (re-uses the dialogue box)
+  function panel(name, text, buttons) {
+    dlg.style.display = "block";
+    document.getElementById("dname").textContent = name;
+    document.getElementById("dtext").textContent = text;
+    const box = document.getElementById("dchoices");
+    box.textContent = "";
+    for (const b of buttons) {
+      const el = document.createElement("button");
+      el.textContent = b.text;
+      el.addEventListener("click", b.run);
+      box.appendChild(el);
+    }
+  }
+  function hidePanel() { dlg.style.display = "none"; }
+
+  function startLesson(teacher) {
+    lesson = { teacher: teacher, phase: "intro", t: 2, n: 0, correct: 0, q: null, shown: -1, seen: [] };
+    done[doneKey()] = true;
+    say(teacher, "Pop quiz! Books closed!", 2.5);
+    panel(teacher.label, "Settle down... pop quiz!", []);
+  }
+  function header() {
+    return lesson.teacher.label + " · Question " + (lesson.n + 1) + "/" + QUESTIONS + " · ⏱ " + Math.max(Math.ceil(lesson.t), 0) + "s";
+  }
+  function makeQuestion() {
+    let sc;
+    for (let k = 0; k < 8; k++) {                       // try not to repeat a question
+      sc = SCENARIOS[pickOne(SUBJECT_QUIZ[lesson.teacher.label])]();
+      if (!lesson.seen.includes(sc.line)) break;
+    }
+    lesson.seen.push(sc.line);
+    return { line: sc.line, options: sc.choices.map((c) => c.text), correct: sc.choices.findIndex((c) => c.gain) };
+  }
+  function nearestMate() {
+    let best = null, bd = 1e9;
+    for (const n of npcs) {
+      if (!n.inRoom || n.kind !== "student") continue;
+      const d = Math.hypot(n.x - pl.x, n.z - pl.z);
+      if (d < bd) { bd = d; best = n; }
+    }
+    return best;
+  }
+  function nextQuestion() {
+    lesson.q = makeQuestion();
+    lesson.phase = "ask";
+    lesson.t = QUESTION_TIME;
+    lesson.shown = Math.ceil(lesson.t);
+    panel(header(), lesson.q.line, lesson.q.options.map((text, i) => ({ text: text, run: () => answer(i) })));
+    const mate = nearestMate();                          // a classmate whispers an answer... which may be wrong
+    if (mate && Math.random() < 0.7) {
+      const guess = Math.random() < 0.6 ? lesson.q.correct : int(0, lesson.q.options.length - 1);
+      say(mate, 'psst... "' + lesson.q.options[guess] + '"', 5);
+    }
+  }
+  function answer(i) {                                   // i = -1 means time ran out
+    if (!lesson || lesson.phase !== "ask") return;
+    const q = lesson.q, ok = i === q.correct;
+    if (ok) { lesson.correct++; addMoney(40); }
+    say(lesson.teacher, ok ? "Correct!" : i < 0 ? "Time up!" : "No. It is " + q.options[q.correct] + ".", 2);
+    for (const n of shuffle(npcs.filter((m) => m.inRoom && m.kind === "student")).slice(0, 2)) {
+      say(n, pickOne(ok ? ["Ehen!", "👏"] : ["😂", "Chai!"]), 1.5);
+    }
+    lesson.phase = "result";
+    lesson.t = 1.6;
+    panel(lesson.teacher.label, ok ? "Correct! +₦40" : (i < 0 ? "Time up! " : "Wrong. ") + "The answer was " + q.options[q.correct] + ".", []);
+  }
+  function finishLesson(abortMsg) {
+    const c = lesson.correct;
+    const bonus = !abortMsg && c === QUESTIONS ? 60 : 0;
+    if (bonus) addMoney(bonus);
+    energy = Math.max(0, energy - 8);
+    lessonsTotal++;
+    try { localStorage.setItem("naijaHighLessons", String(lessonsTotal)); } catch (e) { /* saving is optional */ }
+    const t = lesson.teacher;
+    say(t, c === QUESTIONS ? "Excellent! Full marks!" : c >= 2 ? "Fair. Study more." : "Hmm. See me after class.", 3);
+    lesson.phase = "report";
+    panel(t.label, (abortMsg ? abortMsg + " " : "Quiz over. ") + c + "/" + QUESTIONS + " correct." +
+      (bonus ? " Full marks bonus +₦" + bonus + "!" : "") + " Lessons attended: " + lessonsTotal + ".",
+      [{ text: "OK", run: () => { lesson = null; hidePanel(); } }]);
+  }
+  function updateLesson(dt) {
+    if (!lesson || lesson.phase === "report") return;
+    if (!lesson.teacher.inRoom || scene !== "class") {   // the bell rang, or the teacher left
+      if (lesson.n === 0 && lesson.phase === "intro") { lesson = null; hidePanel(); }
+      else finishLesson("Bell! Class is over.");
+      return;
+    }
+    lesson.t -= dt;
+    if (lesson.phase === "intro") {
+      if (lesson.t <= 0) nextQuestion();
+    } else if (lesson.phase === "ask") {
+      const secs = Math.ceil(lesson.t);
+      if (secs !== lesson.shown) { lesson.shown = secs; document.getElementById("dname").textContent = header(); }
+      if (lesson.t <= 0) answer(-1);
+    } else if (lesson.phase === "result" && lesson.t <= 0) {
+      lesson.n++;
+      if (lesson.n >= QUESTIONS) finishLesson(); else nextQuestion();
+    }
+  }
+
+  function enterRoom() {
+    scene = "class";
+    pl.x = 0; pl.z = 2.3; pl.face = Math.PI;
+    syncRoom();
+    const teacher = npcs.find((n) => n.inRoom && n.kind === "teacher");
+    if (teacher) { say(teacher, "You are late! Sit down quietly.", 3.5); flashHint(clock.period + " · " + teacher.label + " is teaching. Sit at a free desk to join in, or walk out the door to leave.", 5500); }
+    else flashHint("The classroom is empty right now. Walk out the door to leave.", 5000);
+    roomTimer = 4;
+  }
+  function leaveRoom() {
+    scene = "outside";
+    pl.x = 0; pl.z = -3.2; pl.face = 0;
+  }
+
+  // ---------- 7. DRAWING ----------
+  function drawQuad(pts, color) {
+    g.fillStyle = color;
+    g.beginPath();
+    g.moveTo(pts[0][0], pts[0][1]);
+    for (let i = 1; i < 4; i++) g.lineTo(pts[i][0], pts[i][1]);
+    g.closePath();
+    g.fill();
+    g.stroke();
+  }
+
+  const TAG_RADIUS = 3.5; // an NPC's name shows only when you are this close...
+  const TAG_FADE = 1.2;   // ...fading in over the last 1.2 blocks
+  const TAG_MAX = 3;      // and never more than this many NPC names at once
+  function drawNameTags(project) {
+    g.font = "600 13px sans-serif";
+    g.textAlign = "center";
+    g.textBaseline = "middle";
+    const shown = npcs
+      .filter(visibleHere)
+      .map((n) => ({ ch: n, d: Math.hypot(n.x - pl.x, n.z - pl.z) }))
+      .filter((e) => e.d <= TAG_RADIUS)
+      .sort((a, b) => a.d - b.d)
+      .slice(0, TAG_MAX);
+    shown.push({ ch: pl, d: 0 });        // your own "You" tag is always there
+    for (const e of shown) {
+      const ch = e.ch;
+      const q = project([ch.x, 2.75, ch.z]);
+      if (q[2] < 0.1) continue;
+      g.globalAlpha = ch === pl ? 1 : Math.min(1, (TAG_RADIUS - e.d) / TAG_FADE);
+      const w = g.measureText(ch.label).width + 14;
+      g.fillStyle = "rgba(0,0,0,0.55)";
+      g.beginPath();
+      if (g.roundRect) g.roundRect(q[0] - w / 2, q[1] - 11, w, 22, 11);
+      else g.rect(q[0] - w / 2, q[1] - 11, w, 22);
+      g.fill();
+      g.fillStyle = "rgb(" + ch.tag.join(",") + ")";
+      g.fillText(ch.label, q[0], q[1] + 1);
+    }
+    g.globalAlpha = 1;
+  }
+
+  function drawBubbles(project, dt) {
+    g.font = "600 13px sans-serif";
+    g.textAlign = "center";
+    g.textBaseline = "middle";
+    for (const ch of [pl].concat(npcs)) {
+      if (!ch.bubble) continue;
+      ch.bubble.life -= dt;
+      if (ch.bubble.life <= 0) { ch.bubble = null; continue; }
+      if (ch !== pl && !visibleHere(ch)) continue;
+      const q = project([ch.x, 3.5, ch.z]);
+      if (q[2] < 0.1 || q[0] < -80 || q[0] > W + 80 || q[1] < -30 || q[1] > H + 30) continue;
+      const w = g.measureText(ch.bubble.text).width + 18;
+      const cx = Math.min(Math.max(q[0], w / 2 + 6), W - w / 2 - 6);
+      g.globalAlpha = Math.min(1, ch.bubble.life / 0.4);
+      g.fillStyle = "rgba(255,255,255,0.95)";
+      g.beginPath();
+      if (g.roundRect) g.roundRect(cx - w / 2, q[1] - 12, w, 24, 12);
+      else g.rect(cx - w / 2, q[1] - 12, w, 24);
+      g.fill();
+      g.fillStyle = "#102030";
+      g.fillText(ch.bubble.text, cx, q[1] + 1);
+    }
+    g.globalAlpha = 1;
+  }
+
+  function drawFloaters(project, dt) {
+    g.font = "700 18px sans-serif";
+    g.textAlign = "center";
+    g.textBaseline = "middle";
+    g.lineWidth = 3;
+    g.strokeStyle = "rgba(0,0,0,0.6)";
+    for (const f of floaters) {
+      f.life -= dt;
+      if (f.life <= 0) continue;
+      const q = project([pl.x, 3.3 + (1.6 - f.life) * 0.8, pl.z]);
+      g.globalAlpha = Math.min(1, f.life / 0.6);
+      g.fillStyle = "rgb(" + f.color + ")";
+      g.strokeText(f.text, q[0], q[1]);
+      g.fillText(f.text, q[0], q[1]);
+    }
+    g.globalAlpha = 1;
+    g.lineWidth = 1;
+    floaters = floaters.filter((f) => f.life > 0);
+  }
+
+  let last = 0;
+  function frame(now) {
+    requestAnimationFrame(frame);
+    const dt = Math.min((now - last) / 1000, 0.05); // seconds since last frame, capped
+    last = now;
+    updatePlayer(dt);
+    for (const n of npcs) updateNpc(n, dt);
+    updateClock(dt);
+    updateInteract();
+    updateEnergy(dt);
+    updateDirector(dt);
+    updateRoom(dt);
+    updateLesson(dt);
+
+    const list = [];
+    addCharacter(list, pl);
+    for (const n of npcs) if (visibleHere(n)) addCharacter(list, n);
+
+    const target = [pl.x, 1, pl.z];
+    const cam = [pl.x + Math.sin(camYaw) * 11, camHeight, pl.z + Math.cos(camYaw) * 11];
+    // the world we are in; classroom walls between the camera and the room are left out
+    const world = scene === "outside" ? solids : room.filter((b) => !b.cut || b.cut[0] * cam[0] + b.cut[1] * cam[2] <= b.cut[2]);
+    for (const b of world) list.push(b);
+    const f = norm(sub(target, cam));
+    const r = norm(cross(f, [0, 1, 0]));
+    const u = cross(r, f);
+    const focal = Math.min(W, H) * 1.1 * camZoom;
+    const project = (p) => {
+      const d = sub(p, cam);
+      const z = dot(d, f);
+      return [W / 2 + focal * dot(d, r) / z, H / 2 - focal * dot(d, u) / z, z];
+    };
+
+    g.fillStyle = scene === "outside" ? "#87ceeb" : "#2a2d3a";
+    g.fillRect(0, 0, W, H);
+    g.strokeStyle = "rgba(0,0,0,0.2)";
+
+    // ground first: flat tiles never cover anything standing on them
+    for (const tl of (scene === "outside" ? tiles : roomTiles)) {
+      const pts = [[tl.i, 0.5, tl.j], [tl.i + 1, 0.5, tl.j], [tl.i + 1, 0.5, tl.j + 1], [tl.i, 0.5, tl.j + 1]].map(project);
+      if (pts.some((q) => q[2] < 0.1)) continue;
+      drawQuad(pts, "rgb(" + tl.c.join(",") + ")");
+    }
+
+    // then everything else, far to near
+    const dist = (b) => Math.hypot(b.p[0] - cam[0], b.p[1] - cam[1], b.p[2] - cam[2]);
+    list.sort((a, b) => dist(b) - dist(a));
+    for (const b of list) {
+      for (const face of FACES) {
+        const n = orient(face.n, b);
+        const local = [face.n[0] * b.h[0], face.n[1] * b.h[1], face.n[2] * b.h[2]];
+        const center = add(b.p, orient(local, b));
+        if (dot(n, sub(cam, center)) <= 0) continue;
+        const pts = face.v.map((k) =>
+          project(add(b.p, orient([k[0] * b.h[0], k[1] * b.h[1], k[2] * b.h[2]], b)))
+        );
+        if (pts.some((q) => q[2] < 0.1)) continue;
+        drawQuad(pts, "rgb(" + b.c.map((v) => Math.round(v * face.s)).join(",") + ")");
+      }
+    }
+
+    drawNameTags(project);
+    drawBubbles(project, dt);
+    drawFloaters(project, dt);
+  }
+  requestAnimationFrame(frame);
+} catch (e) {
+  document.getElementById("footer").textContent = "Error: " + e.message;
+}
+</script>
+</body>
+</html>
