@@ -1,0 +1,2464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Naija High</title>
+<style>
+:root { --ink: #102030; --btn: rgba(255,255,255,0.6); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --ink: #f0f4f8; --btn: rgba(20,30,40,0.6); } }
+:root[data-theme="dark"] { --ink: #f0f4f8; --btn: rgba(20,30,40,0.6); }
+:root { --panel: rgba(255,255,255,0.95); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --panel: rgba(20,30,40,0.95); } }
+:root[data-theme="dark"] { --panel: rgba(20,30,40,0.95); }
+#cash { position: fixed; right: 12px; top: calc(12px + env(safe-area-inset-top, 0px)); color: var(--ink); background: var(--btn); font: 700 15px sans-serif; padding: 6px 10px; border-radius: 10px; }
+#menuBtn { position: fixed; right: 12px; top: calc(48px + env(safe-area-inset-top, 0px)); width: 40px; height: 36px; border: 0; border-radius: 10px; background: var(--btn); color: var(--ink); font: 700 18px sans-serif; touch-action: manipulation; z-index: 5; }
+#dead { position: fixed; inset: 0; z-index: 60; display: none; align-items: center; justify-content: center; background: rgba(90,10,10,0.82); padding: 16px; box-sizing: border-box; touch-action: manipulation; }
+#deadBox { width: min(92vw, 340px); background: var(--panel); color: var(--ink); border-radius: 18px; padding: 20px; text-align: center; font: 16px sans-serif; box-shadow: 0 6px 28px rgba(0,0,0,.4); }
+#deadTitle { font: 800 26px sans-serif; margin-bottom: 8px; }
+#deadBtn { display: block; width: 100%; margin-top: 14px; padding: 13px 14px; border: 0; border-radius: 12px; background: #e53935; color: #fff; font: 700 17px sans-serif; touch-action: manipulation; }
+#deadFoot { margin-top: 12px; font: 600 11px sans-serif; opacity: .7; }
+#socialBtn { position: fixed; left: 12px; bottom: calc(52px + env(safe-area-inset-bottom, 0px)); display: none; padding: 11px 13px; border: 0; border-radius: 14px; background: #7c4dff; color: #fff; font: 700 14px sans-serif; box-shadow: 0 3px 12px rgba(0,0,0,.2); z-index: 5; touch-action: manipulation; }
+#homeBtn { position: fixed; left: 12px; bottom: calc(100px + env(safe-area-inset-bottom, 0px)); display: none; padding: 11px 13px; border: 0; border-radius: 14px; background: #ff7043; color: #fff; font: 700 14px sans-serif; box-shadow: 0 3px 12px rgba(0,0,0,.2); z-index: 5; touch-action: manipulation; }
+#fade { position: fixed; inset: 0; z-index: 40; display: none; flex-direction: column; align-items: center; justify-content: center; background: rgba(8,12,22,0.92); color: #fff; padding: 24px; box-sizing: border-box; text-align: center; touch-action: manipulation; }
+#fadeText { font: 700 20px/1.35 sans-serif; max-width: 320px; }
+#fadeFoot { margin-top: 18px; font: 600 11px sans-serif; opacity: .6; }
+#act { position: fixed; right: 16px; bottom: calc(212px + env(safe-area-inset-bottom, 0px)); display: none; padding: 12px 18px; border: 0; border-radius: 16px; background: #4caf50; color: #fff; font: 700 16px sans-serif; }
+#talk { position: fixed; right: 16px; bottom: calc(156px + env(safe-area-inset-bottom, 0px)); display: none; padding: 12px 18px; border: 0; border-radius: 16px; background: #f5b800; color: #102030; font: 700 16px sans-serif; }
+#dlg { position: fixed; left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); max-height: min(48vh, 390px); overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y; display: none; background: var(--panel); color: var(--ink); border-radius: 16px; padding: 12px; font: 16px sans-serif; box-shadow: 0 4px 20px rgba(0,0,0,0.25); box-sizing: border-box; }
+#dname { font-weight: 700; margin-bottom: 6px; }
+#dchoices button { display: block; width: 100%; margin-top: 7px; padding: 10px 12px; border: 0; border-radius: 10px; background: #f5b800; color: #102030; font: 600 15px/1.25 sans-serif; text-align: left; touch-action: manipulation; }
+html, body { margin: 0; height: 100%; overflow: hidden; background: #87ceeb; touch-action: none; user-select: none; -webkit-user-select: none; }
+canvas { position: fixed; inset: 0; width: 100%; height: 100%; }
+#footer { position: fixed; left: 12px; bottom: calc(10px + env(safe-area-inset-bottom, 0px)); color: var(--ink); background: var(--btn); font: 600 11px sans-serif; padding: 3px 8px; border-radius: 8px; }
+#zoom { position: fixed; right: 12px; top: 38%; display: flex; flex-direction: column; gap: 8px; }
+#zoom button { width: 44px; height: 44px; border: 0; border-radius: 12px; background: var(--btn); color: var(--ink); font: 700 22px sans-serif; touch-action: manipulation; }
+#hint { position: fixed; left: 50%; transform: translateX(-50%); top: calc(80px + env(safe-area-inset-top, 0px)); color: var(--ink); background: var(--btn); font: 600 13px sans-serif; padding: 5px 12px; border-radius: 10px; transition: opacity 1s; pointer-events: none; max-width: 90vw; text-align: center; }
+#energy { position: fixed; left: 12px; top: calc(52px + env(safe-area-inset-top, 0px)); width: 120px; height: 14px; background: var(--btn); border-radius: 8px; overflow: hidden; }
+#efill { height: 100%; width: 100%; background: #4caf50; }
+#social { position: fixed; left: 12px; top: calc(72px + env(safe-area-inset-top, 0px)); display: none; color: var(--ink); background: var(--btn); font: 600 12px sans-serif; padding: 4px 8px; border-radius: 8px; pointer-events: none; }
+#hud { position: fixed; left: 12px; top: calc(12px + env(safe-area-inset-top, 0px)); color: var(--ink); background: var(--btn); font: 600 15px sans-serif; padding: 6px 10px; border-radius: 10px; }
+#pad { position: fixed; right: 16px; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); display: grid; grid-template-columns: repeat(3, 60px); grid-auto-rows: 60px; gap: 6px; }
+#pad button { border: 0; border-radius: 14px; background: var(--btn); color: var(--ink); font-size: 24px; touch-action: none; }
+#up { grid-column: 2; grid-row: 1; }
+#left { grid-column: 1; grid-row: 2; }
+#down { grid-column: 2; grid-row: 2; }
+#right { grid-column: 3; grid-row: 2; }
+#menu { position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center; background: rgba(10,20,35,0.8); padding: 16px; box-sizing: border-box; touch-action: manipulation; }
+#mbox { width: min(92vw, 360px); background: var(--panel); color: var(--ink); border-radius: 18px; padding: 18px; box-shadow: 0 6px 28px rgba(0,0,0,.35); font: 16px sans-serif; }
+#mtitle { font: 800 24px sans-serif; margin-bottom: 4px; }
+#msub { opacity: .8; margin-bottom: 8px; }
+#mbox button { display: block; width: 100%; margin-top: 8px; padding: 13px 14px; border: 0; border-radius: 12px; background: #f5b800; color: #102030; font: 700 16px sans-serif; text-align: left; white-space: pre-line; touch-action: manipulation; }
+#mfoot { margin-top: 12px; font: 600 11px sans-serif; opacity: .7; text-align: center; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="hud"></div>
+<div id="energy"><div id="efill"></div></div>
+<div id="social"></div>
+<div id="hint"></div>
+<div id="zoom"><button id="zin" aria-label="zoom in">+</button><button id="zout" aria-label="zoom out">−</button></div>
+<div id="footer">Made by DrIntel</div>
+<div id="cash">₦0</div>
+<button id="menuBtn" aria-label="menu">🔄</button>
+<button id="socialBtn">🗣️ Truth or Dare</button>
+<button id="homeBtn">🏠 Go home</button>
+<button id="act"></button>
+<button id="talk"></button>
+<div id="dlg"><div id="dname"></div><div id="dtext"></div><div id="dchoices"></div></div>
+<div id="dead"><div id="deadBox"><div id="deadTitle">💀 You don die!</div><div id="deadMsg"></div><button id="deadBtn">↻ Restart game</button><div id="deadFoot">Made by DrIntel</div></div></div>
+<div id="fade"><div id="fadeText"></div><div id="fadeFoot">Made by DrIntel</div></div>
+<div id="menu"><div id="mbox"></div></div>
+<div id="pad">
+  <button id="up" aria-label="forward">▲</button>
+  <button id="left" aria-label="left">◀</button>
+  <button id="down" aria-label="back">▼</button>
+  <button id="right" aria-label="right">▶</button>
+</div>
+<script>
+try {
+  const cv = document.getElementById("c");
+  const g = cv.getContext("2d");
+  let W = 360, H = 640;
+  function resize() {
+    W = cv.width = document.documentElement.clientWidth || 360;
+    H = cv.height = document.documentElement.clientHeight || 640;
+  }
+  resize();
+  new ResizeObserver(resize).observe(document.documentElement);
+
+  // =====================================================================
+  //  SETTINGS YOU CAN EDIT
+  // =====================================================================
+  // 1) THANK-YOU FENCE: these names are painted on advert boards along the school fence.
+  //    To ADD a person: add a new line like  "Their Name",  (keep the quotes and the comma).
+  //    To REMOVE a person: delete their line.  To CHANGE a name: edit the text between the quotes.
+  //    The fence has room for 46 names (back fence first, then right, left and front).
+  const THANKS = [
+    "",
+    "THANKS TO:",
+    "YOU 😜",
+    "NAIJA HIGH",
+    "IS MY",
+    "FAVOURITE",
+    "SCHOOL.",
+  ];
+  // 2) WHEN A VEHICLE KILLS YOU: the share of your money you lose before the game restarts.
+  //    0 = keep all your money, 0.5 = lose half, 1 = lose everything.
+  const DEATH_MONEY_LOSS = 0.5;
+  // =====================================================================
+
+  // ---------- 1. VECTOR HELPERS ----------
+  const sub = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
+  const add = (a, b) => [a[0] + b[0], a[1] + b[1], a[2] + b[2]];
+  const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+  const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+  const norm = (a) => { const l = Math.hypot(a[0], a[1], a[2]); return [a[0] / l, a[1] / l, a[2] / l]; };
+  const rotX = (v, a) => {
+    const c = Math.cos(a), s = Math.sin(a);
+    return [v[0], v[1] * c - v[2] * s, v[1] * s + v[2] * c];
+  };
+  const orient = (v, b) => rotY(b.rx ? rotX(v, b.rx) : v, b.r); // a box's own turn: tilt first, then spin
+  const rotY = (v, a) => {
+    const c = Math.cos(a), s = Math.sin(a);
+    return [v[0] * c + v[2] * s, v[1], -v[0] * s + v[2] * c];
+  };
+
+  // ---------- 2. GROUND: tile (i, j) covers x from i to i+1 and z from j to j+1 ----------
+  const SAND = [214, 196, 150];
+  function tileColor(i, j) {
+    if ((i === -1 || i === 0) && j >= -4 && j <= 14) return SAND;         // path from classroom to street
+    if (j === 20) return [190, 185, 170];                                  // pavement on the far side of the road
+    if (j >= 15 && j <= 19) return (j === 15 || j === 19) ? [145, 130, 105] : [76, 78, 82]; // street and shoulders
+    if (i >= 3 && i <= 9 && j >= 1 && j <= 8)                             // football field stripes
+      return i % 2 === 0 ? [102, 187, 106] : [88, 170, 92];
+    return (i + j) % 2 === 0 ? [76, 175, 80] : [67, 160, 71];             // normal grass checker
+  }
+  const tiles = [];
+  for (let i = -16; i < 16; i++)
+    for (let j = -12; j < 31; j++)
+      tiles.push({ i: i, j: j, c: tileColor(i, j) });
+
+  // ---------- 3. SOLID OBJECTS ----------
+  // box(x, y, z, hx, hy, hz, color): y is measured UP from the top of the ground
+  const solids = [];
+  function box(x, y, z, hx, hy, hz, c) {
+    solids.push({ p: [x, 0.5 + y, z], h: [hx, hy, hz], r: 0, c: c });
+  }
+  const WALLS = []; // flat rectangles the student cannot enter
+
+  // classroom block: walls, roof, door, four windows
+  box(0, 1.5, -6, 5, 1.5, 2, [245, 235, 200]);
+  box(0, 3.15, -6, 5.3, 0.15, 2.3, [150, 50, 40]);
+  box(0, 0.8, -3.97, 0.5, 0.8, 0.03, [90, 55, 30]);
+  for (const wx of [-3.8, -2.2, 2.2, 3.8]) box(wx, 1.8, -3.97, 0.45, 0.4, 0.03, [150, 200, 235]);
+  WALLS.push({ x0: -5, x1: 5, z0: -8, z1: -4 });
+
+  // fence: segments 2 wide, around the edge, with a gap for the gate
+  for (let k = -11; k <= 11; k += 2) {
+    const c = ((k + 11) / 2) % 2 === 0 ? [235, 235, 225] : [150, 190, 230];
+    box(k, 0.6, -11.5, 1, 0.6, 0.15, c);                      // back fence
+    if (k !== -1 && k !== 1) box(k, 0.6, 11.5, 1, 0.6, 0.15, c); // front fence, gate gap at -1 and 1
+    box(-11.5, 0.6, k, 0.15, 0.6, 1, c);                      // left fence
+    box(11.5, 0.6, k, 0.15, 0.6, 1, c);                       // right fence
+    WALLS.push({ x0: k - 1, x1: k + 1, z0: -11.65, z1: -11.35 });                        // back fence is solid
+    if (k !== -1 && k !== 1) WALLS.push({ x0: k - 1, x1: k + 1, z0: 11.35, z1: 11.65 }); // front fence is solid, gate gap stays open
+    WALLS.push({ x0: -11.65, x1: -11.35, z0: k - 1, z1: k + 1 });                        // left fence is solid
+    WALLS.push({ x0: 11.35, x1: 11.65, z0: k - 1, z1: k + 1 });                          // right fence is solid
+  }
+  box(-2.3, 0.9, 11.5, 0.3, 0.9, 0.3, [60, 110, 190]);        // gate pillars
+  box(2.3, 0.9, 11.5, 0.3, 0.9, 0.3, [60, 110, 190]);
+
+  // ---------- THANK-YOU FENCE: advert boards on the inside of the school fence, one per name in THANKS ----------
+  const SIGNS = [];
+  (function buildThanksFence() {
+    const slots = [];
+    for (let k = -11; k <= 11; k += 2) slots.push({ x: k, z: -11.33, N: [0, 0, 1], A: [1, 0, 0] });              // back fence
+    for (let k = -11; k <= 11; k += 2) slots.push({ x: 11.33, z: k, N: [-1, 0, 0], A: [0, 0, 1] });             // right fence
+    for (let k = -11; k <= 11; k += 2) slots.push({ x: -11.33, z: k, N: [1, 0, 0], A: [0, 0, -1] });            // left fence
+    for (let k = -11; k <= 11; k += 2) if (k !== -1 && k !== 1) slots.push({ x: k, z: 11.33, N: [0, 0, -1], A: [-1, 0, 0] }); // front fence (gate gap skipped)
+    const BOARD = [[40, 110, 200], [230, 170, 30], [200, 60, 50], [40, 150, 90], [130, 70, 170]];
+    const INK = ["#ffffff", "#102030", "#ffffff", "#ffffff", "#ffffff"];
+    for (let i = 0; i < THANKS.length && i < slots.length; i++) {
+      const s = slots[i], c = i % BOARD.length;
+      const alongX = s.A[0] !== 0;
+      box(s.x, 0.62, s.z, alongX ? 0.9 : 0.02, 0.34, alongX ? 0.02 : 0.9, BOARD[c]);
+      SIGNS.push({ sign: true, p: [s.x + s.N[0] * 0.08, 0.5 + 0.62, s.z + s.N[2] * 0.08], N: s.N, A: s.A, text: String(THANKS[i]), ink: INK[c], h: [0, 0, 0], c: [0, 0, 0] });
+    }
+  })();
+
+  // trees: trunk plus two leaf blocks
+  function tree(x, z) {
+    box(x, 0.8, z, 0.2, 0.8, 0.2, [110, 75, 40]);
+    box(x, 2.2, z, 0.8, 0.6, 0.8, [34, 120, 50]);
+    box(x, 3.2, z, 0.5, 0.4, 0.5, [40, 140, 60]);
+    WALLS.push({ x0: x - 0.2, x1: x + 0.2, z0: z - 0.2, z1: z + 0.2 });
+  }
+  tree(-8, -1);
+  tree(-8, 5);
+  tree(-6, 8);
+  tree(8.5, -9);
+
+  // playground swing set: sturdy frame plus a seat that moves back and forth
+  const SWING = { x: -5.5, z: -2.0, angle: 0 };
+  const SWING_FRAME = [
+    { x: SWING.x - 1.15, y: 1.55, z: SWING.z, hx: 0.10, hy: 1.55, hz: 0.10, c: [70, 85, 100] },
+    { x: SWING.x + 1.15, y: 1.55, z: SWING.z, hx: 0.10, hy: 1.55, hz: 0.10, c: [70, 85, 100] },
+    { x: SWING.x, y: 3.05, z: SWING.z, hx: 1.35, hy: 0.12, hz: 0.12, c: [55, 70, 85] }
+  ];
+  for (const a of SWING_FRAME) box(a.x, a.y, a.z, a.hx, a.hy, a.hz, a.c);
+  const swingChains = [];
+  for (const dx of [-0.32, 0.32]) {
+    // Each chain is positioned halfway between its fixed top pivot and the moving seat.
+    const chain = { p: [SWING.x + dx, 2.305, SWING.z], h: [0.025, 0.625, 0.025], r: 0, c: [90, 90, 95], rx: 0 };
+    swingChains.push(chain); solids.push(chain);
+  }
+  const SWING_PIVOT_Y = 2.93;
+  const SWING_LENGTH = 1.25;
+  const swingSeat = { p: [SWING.x, SWING_PIVOT_Y - SWING_LENGTH, SWING.z], h: [0.42, 0.08, 0.22], r: 0, c: [210, 65, 45], rx: 0 };
+  solids.push(swingSeat);
+  WALLS.push({ x0: SWING.x - 1.3, x1: SWING.x - 1.0, z0: SWING.z - 0.2, z1: SWING.z + 0.2 });
+  WALLS.push({ x0: SWING.x + 1.0, x1: SWING.x + 1.3, z0: SWING.z - 0.2, z1: SWING.z + 0.2 });
+
+  // buka (food stall): counter, back wall, four posts, roof, sign, food on the counter
+  box(8.5, 0.55, -3.2, 1.6, 0.55, 0.35, [150, 100, 55]);
+  box(8.5, 1.0, -5.25, 1.8, 1.0, 0.08, [245, 235, 200]);
+  for (const px of [6.8, 10.2]) for (const pz of [-2.9, -5.1]) box(px, 1.0, pz, 0.08, 1.0, 0.08, [110, 75, 40]);
+  box(8.5, 2.15, -4, 1.9, 0.12, 1.3, [200, 50, 40]);
+  box(8.5, 2.5, -2.72, 1.2, 0.2, 0.04, [255, 214, 64]);
+  box(7.6, 1.3, -3.2, 0.22, 0.2, 0.22, [60, 60, 70]);
+  box(8.6, 1.2, -3.2, 0.3, 0.1, 0.2, [240, 240, 235]);
+  box(9.5, 1.25, -3.2, 0.2, 0.15, 0.2, [220, 150, 50]);
+  WALLS.push({ x0: 6.9, x1: 10.1, z0: -3.55, z1: -2.85 });
+  WALLS.push({ x0: 6.7, x1: 10.3, z0: -5.35, z1: -5.15 });
+
+  // ---------- VEHICLES: little box models, like characters. Forward is +z. ----------
+  const TYRE = [30, 30, 32], GLASS = [140, 190, 225], DARK = [40, 40, 44];
+  const wheel = (x, z, r) => [x, r, z, 0.09, r, r, TYRE];
+  const person = (x, y, z, shirt, skin, cap) => {            // a seated driver or passenger: body, head, optional cap
+    const p = [[x, y, z, 0.2, 0.28, 0.12, shirt], [x, y + 0.48, z + 0.02, 0.15, 0.15, 0.15, skin]];
+    if (cap) p.push([x, y + 0.66, z + 0.02, 0.16, 0.04, 0.16, cap]);
+    return p;
+  };
+  const VEH = {
+    okada: { len: 0.95, wid: 0.45, speed: 7, build: (c, s) => [
+      wheel(0, 0.75, 0.3), wheel(0, -0.75, 0.3), [0, 0.55, 0, 0.14, 0.12, 0.8, c], [0, 0.8, 0.25, 0.18, 0.12, 0.25, c],
+      [0, 0.78, -0.35, 0.17, 0.05, 0.4, DARK], [0, 1.05, 0.6, 0.38, 0.04, 0.05, [70, 70, 75]], [0, 0.85, 0.9, 0.08, 0.08, 0.04, [255, 240, 160]]
+    ].concat(person(0, 1.25, 0.1, s.shirt, s.skin, s.cap), s.pax ? person(0, 1.25, -0.5, s.pax, s.skin2, null) : []) },
+    keke: { len: 1.1, wid: 0.7, speed: 4.5, build: (c, s) => [
+      wheel(0, 1.05, 0.3), wheel(-0.55, -0.7, 0.3), wheel(0.55, -0.7, 0.3), [0, 0.7, -0.2, 0.6, 0.28, 0.95, c], [0, 0.98, -0.2, 0.62, 0.04, 0.97, DARK],
+      [0, 0.65, 0.95, 0.3, 0.25, 0.2, c], [0, 2.2, -0.3, 0.66, 0.05, 0.9, [40, 110, 60]],
+      [-0.58, 1.45, 0.45, 0.04, 0.75, 0.04, DARK], [0.58, 1.45, 0.45, 0.04, 0.75, 0.04, DARK], [-0.6, 1.45, -1.1, 0.04, 0.75, 0.04, DARK], [0.6, 1.45, -1.1, 0.04, 0.75, 0.04, DARK]
+    ].concat(person(0, 1.3, 0.4, s.shirt, s.skin, null), s.pax ? person(0, 1.3, -0.6, s.pax, s.skin2, null) : []) },
+    car: { len: 1.6, wid: 0.8, speed: 6, build: (c) => [
+      wheel(-0.65, 1.0, 0.3), wheel(0.65, 1.0, 0.3), wheel(-0.65, -1.0, 0.3), wheel(0.65, -1.0, 0.3),
+      [0, 0.65, 0, 0.7, 0.3, 1.55, c], [0, 1.12, -0.15, 0.6, 0.25, 0.85, c.map((v) => Math.round(v * 0.8))], [0, 1.15, -0.15, 0.61, 0.15, 0.75, GLASS]
+    ] },
+    danfo: { len: 2.0, wid: 0.8, speed: 4, build: (c, s) => [
+      wheel(-0.65, 1.3, 0.4), wheel(0.65, 1.3, 0.4), wheel(-0.65, -1.3, 0.4), wheel(0.65, -1.3, 0.4),
+      [0, 1.15, 0, 0.72, 0.65, 2.0, c], [0, 1.05, 0, 0.73, 0.1, 2.01, DARK], [0, 1.6, 0.1, 0.735, 0.2, 1.7, GLASS],
+      [0, 1.88, 0, 0.74, 0.04, 2.0, DARK], [0, 1.55, 2.0, 0.6, 0.22, 0.02, GLASS], [0.3, 1.65, 1.5, 0.14, 0.14, 0.14, s.skin]
+    ] }
+  };
+  const VCOLOURS = {
+    okada: [[210, 60, 45], [45, 120, 200], [245, 190, 40], [60, 60, 65]],
+    keke: [[245, 200, 30], [245, 200, 30], [235, 170, 25]],
+    car: [[230, 230, 235], [60, 90, 160], [170, 40, 45], [40, 40, 48], [200, 190, 150]],
+    danfo: [[250, 200, 30]]
+  };
+  const SHIRTS = [[200, 60, 60], [60, 140, 200], [90, 170, 90], [230, 150, 50], [150, 90, 180], [240, 240, 240]];
+  function placeVehicle(type, x, z, face, col, wall) {       // a parked, solid vehicle
+    for (const q of VEH[type].build(col, { shirt: SHIRTS[0], skin: SKINS[0] }).filter((p) => p[1] < 1.2 || type === "car")) {
+      const w = rotY([q[0], q[1], q[2]], face);
+      solids.push({ p: [x + w[0], 0.5 + w[1], z + w[2]], h: [q[3], q[4], q[5]], r: face, c: q[6] });
+    }
+    WALLS.push(wall);
+  }
+
+  // ---------- STREET OUTSIDE THE SCHOOL GATE ----------
+  // Vulcaniser: a small roadside tyre-repair spot on the left side of the street.
+  box(-8.4, 0.48, 21.3, 1.45, 0.08, 0.65, [95, 70, 48]);       // work platform
+  box(-8.4, 0.9, 21.3, 1.3, 0.38, 0.08, [185, 145, 80]);       // front of workbench
+  box(-9.35, 1.2, 21.1, 0.35, 0.32, 0.12, [65, 65, 70]);       // air pump / tools
+  box(-7.5, 0.5, 20.3, 0.38, 0.38, 0.12, [35, 35, 38]);        // spare tyre
+  box(-7.5, 0.5, 20.3, 0.2, 0.2, 0.14, [150, 150, 150]);      // tyre hub
+  box(-9.8, 0.5, 22.2, 0.38, 0.38, 0.12, [35, 35, 38]);        // second tyre
+  box(-9.8, 0.5, 22.2, 0.2, 0.2, 0.14, [150, 150, 150]);      // second hub
+  box(-8.4, 1.9, 21.25, 1.55, 0.08, 0.72, [45, 95, 160]);      // shade roof
+  box(-9.8, 1.0, 20.7, 0.06, 0.95, 0.06, [95, 65, 35]);
+  box(-7.0, 1.0, 20.7, 0.06, 0.95, 0.06, [95, 65, 35]);
+  // Roasted-corn seller: colourful stall, charcoal brazier and visible corn cobs on the right.
+  box(7.3, 0.55, 21.3, 1.2, 0.12, 0.58, [135, 75, 35]);       // counter top
+  box(7.3, 0.3, 21.3, 1.05, 0.25, 0.45, [160, 90, 45]);       // counter body
+  box(7.3, 0.9, 21.3, 0.55, 0.16, 0.32, [45, 45, 45]);        // charcoal brazier
+  box(7.05, 1.08, 21.26, 0.2, 0.09, 0.1, [245, 180, 35]);     // roasted corn
+  box(7.35, 1.08, 21.26, 0.2, 0.09, 0.1, [255, 205, 65]);
+  box(7.65, 1.08, 21.26, 0.2, 0.09, 0.1, [235, 165, 30]);
+  box(7.3, 1.95, 21.3, 1.45, 0.08, 0.72, [210, 55, 45]);       // umbrella canopy
+  box(7.3, 1.35, 21.3, 0.06, 0.58, 0.06, [95, 65, 35]);       // umbrella pole
+  // stalls now stand on the pavement south of the road, so they are solid counters
+  WALLS.push({ x0: -9.85, x1: -6.95, z0: 20.65, z1: 21.95 });
+  WALLS.push({ x0: 6.1, x1: 8.5, z0: 20.72, z1: 21.88 });
+
+  const FACES = [
+    { n: [0, 1, 0],  s: 1,    v: [[-1, 1, -1], [1, 1, -1], [1, 1, 1], [-1, 1, 1]] },
+    { n: [1, 0, 0],  s: 0.8,  v: [[1, 1, -1], [1, 1, 1], [1, -1, 1], [1, -1, -1]] },
+    { n: [-1, 0, 0], s: 0.8,  v: [[-1, 1, -1], [-1, 1, 1], [-1, -1, 1], [-1, -1, -1]] },
+    { n: [0, 0, 1],  s: 0.65, v: [[-1, 1, 1], [1, 1, 1], [1, -1, 1], [-1, -1, 1]] },
+    { n: [0, 0, -1], s: 0.65, v: [[-1, 1, -1], [1, 1, -1], [1, -1, -1], [-1, -1, -1]] }
+  ];
+
+  // ---------- 4. CHARACTERS ----------
+  // each part's color is a NAME; a character's "look" says what each name means
+  const SH_R = [0.44, 1.28, 0], SH_L = [-0.44, 1.28, 0]; // shoulders: arms turn around these points
+  const PARTS = [
+    { off: [-0.15, 0.3, 0],  h: [0.14, 0.3, 0.14],   c: "shorts", swing: 1,  pivot: [-0.15, 0.6, 0], leg: true },
+    { off: [0.15, 0.3, 0],   h: [0.14, 0.3, 0.14],   c: "shorts", swing: -1, pivot: [0.15, 0.6, 0],  leg: true },
+    { off: [0, 0.95, 0],     h: [0.32, 0.35, 0.17],  c: "shirt" },
+    { off: [-0.44, 0.95, 0], h: [0.1, 0.33, 0.12],   c: "shirt", swing: -1, pivot: SH_L, arm: "L" },
+    { off: [0.44, 0.95, 0],  h: [0.1, 0.33, 0.12],   c: "shirt", swing: 1,  pivot: SH_R, arm: "R" },
+    { off: [0, 1.55, 0],     h: [0.25, 0.25, 0.25],  c: "skin" },
+    { off: [0, 1.78, 0],     h: [0.26, 0.09, 0.26],  c: "hair" },
+    { off: [0, 1.98, -0.12], h: [0.13, 0.1, 0.13],   c: "bun" },
+    { off: [-0.1, 1.58, 0.25], h: [0.05, 0.05, 0.02], c: "eye" },
+    { off: [0.1, 1.58, 0.25],  h: [0.05, 0.05, 0.02], c: "eye" },
+    { off: [0, 0.95, -0.25], h: [0.22, 0.25, 0.08],  c: "bag" },
+    { off: [0.56, 0.7, 0.3],  h: [0.03, 0.03, 0.35], c: "cane", swing: 1, pivot: SH_R, arm: "R" },
+    { off: [0.52, 0.7, 0.12], h: [0.09, 0.04, 0.13], c: "book", swing: 1, pivot: SH_R, arm: "R" }
+  ];
+  const SKINS = [[141, 85, 36], [110, 66, 30], [166, 106, 56], [92, 54, 24]];
+  const BAGS = [[200, 40, 40], [40, 90, 200], [230, 170, 30]];
+  function look(shirt, shorts, skin, bag, cane, book) {
+    return { shirt: shirt, shorts: shorts, skin: skin, hair: [25, 20, 20], eye: [10, 10, 10], bag: bag, cane: cane, book: book };
+  }
+
+  // turns one character into world blocks and adds them to a list
+  function addCharacter(list, ch) {
+    for (const part of PARTS) {
+      const color = ch.look[part.c];
+      if (!color) continue;                       // e.g. teachers have no bag
+      if (ch.seated && part.leg) continue;        // sitting people hide their legs
+      let angle = part.swing ? part.swing * Math.sin(ch.t) * 0.6 * ch.sw : 0;   // walking swing
+      if (part.arm === "R" && ch.armR != null) angle = ch.armR;                 // a scripted right arm wins
+      let off = part.off;
+      if (angle !== 0) off = add(part.pivot, rotX(sub(part.off, part.pivot), angle));
+      const w = rotY(off, ch.face);
+      list.push({
+        p: [ch.x + w[0] + (ch.shake ? ch.shake * Math.sin(uiTime * 45) : 0), 0.5 + w[1] + (ch.yOffset || 0), ch.z + w[2]],
+        h: part.h, c: color, r: ch.face, rx: angle
+      });
+    }
+  }
+
+  // ---------- 5. INPUT ----------
+  const keys = { up: false, down: false, left: false, right: false };
+  function bindButton(id) {
+    const el = document.getElementById(id);
+    el.addEventListener("pointerdown", (e) => { e.preventDefault(); keys[id] = true; });
+    ["pointerup", "pointerleave", "pointercancel"].forEach((ev) =>
+      el.addEventListener(ev, () => { keys[id] = false; })
+    );
+  }
+  ["up", "down", "left", "right"].forEach(bindButton);
+  const KEYMAP = { ArrowUp: "up", w: "up", ArrowDown: "down", s: "down", ArrowLeft: "left", a: "left", ArrowRight: "right", d: "right" };
+  addEventListener("keydown", (e) => { if (KEYMAP[e.key]) keys[KEYMAP[e.key]] = true; });
+  addEventListener("keyup", (e) => { if (KEYMAP[e.key]) keys[KEYMAP[e.key]] = false; });
+
+  // ---------- 6. MOVEMENT, PLAYER AND NPCs ----------
+  const RADIUS = 0.3;
+  const PLAYER_SPEED = 7; // blocks per SECOND
+  const rand = (a, b) => a + Math.random() * (b - a);
+
+  function free(x, z) {
+    if (x < -15 || x > 15 || z < -11 || z > 29) return false;
+    for (const w of WALLS) {
+      if (x > w.x0 - RADIUS && x < w.x1 + RADIUS && z > w.z0 - RADIUS && z < w.z1 + RADIUS) return false;
+    }
+    return true;
+  }
+
+  // move character ch in direction (dx, dz); returns true if it actually moved
+  function walk(ch, dx, dz, speed, dt) {
+    const len = Math.hypot(dx, dz);
+    if (len === 0) return false;
+    const nx = ch.x + (dx / len) * speed * dt;
+    const nz = ch.z + (dz / len) * speed * dt;
+    let moved = false;
+    const ok = (ch === pl && scene === "class") ? freeRoom : free; // the classroom has its own walls
+    if (ok(nx, ch.z)) { ch.x = nx; moved = true; }
+    if (ok(ch.x, nz)) { ch.z = nz; moved = true; }
+    ch.face = Math.atan2(dx, dz);
+    return moved;
+  }
+
+  // walking animation: t is the swing clock, sw is swing strength (0 to 1)
+  function animate(ch, moving, dt, rate) {
+    if (moving) ch.t += dt * rate;
+    ch.sw = moving ? Math.min(ch.sw + dt * 9, 1) : Math.max(ch.sw - dt * 9, 0);
+  }
+
+  const pl = { x: 0, z: 9.5, face: 0, t: 0, sw: 0, yOffset: 0, onSwing: false, label: "You", tag: [255, 214, 64], look: look([240, 240, 240], [30, 60, 140], SKINS[0], BAGS[0]) };
+
+  function updatePlayer(dt) {
+    if (dialogue || trip) { pl.moving = false; animate(pl, false, dt, 16); return; }
+    if (pl.seated) { pl.moving = false; animate(pl, false, dt, 16); return; }
+    const ix = (keys.right ? 1 : 0) - (keys.left ? 1 : 0);
+    const iz = (keys.down ? 1 : 0) - (keys.up ? 1 : 0);
+    // turn the button direction so that "up" always means "away from the camera"
+    const dx = ix * Math.cos(camYaw) + iz * Math.sin(camYaw);
+    const dz = -ix * Math.sin(camYaw) + iz * Math.cos(camYaw);
+    const moved = walk(pl, dx, dz, PLAYER_SPEED * (energy > 0 ? 1 : 0.5), dt);
+    pl.moving = moved;
+    animate(pl, moved, dt, 16);
+  }
+
+  // NPCs follow the school day. PLAN says what everyone does in each period.
+  const PLAN = {
+    "Arrival": "wander", "Assembly": "assembly",
+    "Class 1": "class", "Class 2": "class", "Break": "wander",
+    "Class 3": "class", "Class 4": "class", "Closing": "home"
+  };
+  const TEACHER_TAG = [150, 230, 170];
+  const STUDENT_INFO = [
+    { name: "Tunde",   subject: "maths",           snack: "puff-puff",    pool: ["lend", "gossip", "timesTable"] },
+    { name: "Amaka",   subject: "English",         snack: "gala",         pool: ["help", "gossip", "timesTable"] },
+    { name: "Chidi",   subject: "Basic Science",   snack: "buns",         pool: ["help", "lend", "gossip"] },
+    { name: "Ibrahim", subject: "Civic Education", snack: "suya",         pool: ["lend", "help", "timesTable"] },
+    { name: "Ngozi",   subject: "Agric Science",   snack: "roasted corn", pool: ["gossip", "help", "timesTable"] },
+    { name: "Femi",    subject: "Government",      snack: "chin chin",    pool: ["lend", "gossip", "help"] },
+    { name: "Hauwa",   subject: "Biology",         snack: "kilishi",      pool: ["help", "timesTable", "gossip"] },
+    { name: "Emeka",   subject: "Economics",       snack: "akara",        pool: ["lend", "timesTable", "help"] }
+  ];
+  const TEACHER_INFO = {
+    principal: {
+      principal: true,
+      pool: ["lecture", "inspect"],
+      carry: "",
+      scold: ["Why are you wandering during class? Is this a market?", "Student, the corridor is not your playground. Go and learn!"]
+    },
+    opon: {
+      pool: ["mathsQuiz", "carry"],
+      carry: "These textbooks are heavier than my salary. Can you carry them to the staff room?",
+      scold: ["Why are you outside during my maths class? Go and solve something!", "x equals trouble, and the trouble is you. Back to class!"]
+    },
+    shukudi: {
+      pool: ["englishQuiz", "carry"],
+      carry: "Please carry these exercise books to the staff room. Gently, o!",
+      scold: ["English does not teach itself. Why are you outside?", "Is this how you speak and behave? Back to class at once!"]
+    },
+    kasala: {
+      pool: ["uniform", "report", "excuse"],
+      carry: "",
+      scold: ["Do you see this cane? It has seen you outside class.", "Class has started. Why is your face still here?"]
+    },
+    bamidele: {
+      pool: ["homeEcQuiz", "carry", "jollof"],
+      carry: "Help me carry these pots to the home economics room. Do not spill my stew!",
+      scold: ["Is this how your mother raised you? Go to class!", "My dear, the kitchen can wait. Your class cannot."]
+    }
+  };
+  const npcs = [];
+  const slots = { student: 0, teacher: 0 };
+
+  function pickTarget(n) {
+    for (let k = 0; k < 20; k++) {
+      const x = rand(-10.5, 10.5), z = rand(-10.5, 10.5);
+      if (free(x, z)) { n.tx = x; n.tz = z; n.giveUp = 8; return; }
+    }
+    n.tx = n.x; n.tz = n.z; n.giveUp = 8;
+  }
+
+  function addNpc(lk, speed, label, tag, kind, patrol, info) {
+    let x = 0, z = 0;
+    do { x = rand(-10.5, 10.5); z = rand(-10.5, 10.5); } while (!free(x, z));
+    const n = {
+      x: x, z: z, face: 0, t: 0, sw: 0, look: lk, label: label, tag: tag, speed: speed,
+      tx: x, tz: z, wait: rand(0, 2), giveUp: 8,
+      kind: kind, patrol: patrol, info: info, last: -1, owes: 0, skipChance: kind === "student" ? 0.2 : 0, slot: slots[kind]++,
+      seenPlan: null, mode: "wander", inside: false, hideAt: "door", talking: false, cool: 0
+    };
+    pickTarget(n);
+    npcs.push(n);
+  }
+
+  for (let k = 0; k < 8; k++)
+    addNpc(look([240, 240, 240], [30, 60, 140], SKINS[k % 4], BAGS[k % 3]), 2.6, STUDENT_INFO[k].name, [255, 255, 255], "student", false, STUDENT_INFO[k]);
+  // Zara is a real roaming NPC, not a menu event. Her name tag marks her as the player's crush.
+  addNpc(look([220, 105, 155], [45, 70, 150], SKINS[2], [230, 170, 40]), 2.4, "Zara", [255, 225, 245], "student", false,
+    { name: "Zara", subject: "Biology", snack: "chin chin", pool: ["gossip"] });
+  const crushNpc = npcs[npcs.length - 1];
+  crushNpc.specialCrush = true;
+  crushNpc.tagLabel = "Your crush";
+  crushNpc.x = -7.5; crushNpc.z = 4.5; crushNpc.tx = -5.5; crushNpc.tz = 5.5;
+  addNpc(look([60, 140, 90], [50, 50, 60], SKINS[1], null, [190, 140, 70], null), 1.6, "Mr Opon", TEACHER_TAG, "teacher", false, TEACHER_INFO.opon);
+  addNpc(look([220, 120, 50], [50, 50, 60], SKINS[2], null, null, [200, 50, 50]), 1.6, "Mrs Shukudi", TEACHER_TAG, "teacher", false, TEACHER_INFO.shukudi);
+  addNpc(look([150, 60, 70], [50, 50, 60], SKINS[3], null, [190, 140, 70], null), 1.8, "Mr Kasala", TEACHER_TAG, "teacher", true, TEACHER_INFO.kasala);
+  addNpc(look([140, 90, 160], [50, 50, 60], SKINS[0], null, null, [40, 90, 170]), 1.6, "Mrs Bamidele", TEACHER_TAG, "teacher", false, TEACHER_INFO.bamidele);
+  addNpc(look([30, 40, 100], [35, 35, 45], SKINS[1], null, null, null), 1.5, "Principal Okafor", [255, 190, 90], "teacher", false, TEACHER_INFO.principal);
+  // Mama Put stands behind her counter and never moves
+  npcs.push({
+    x: 8.5, z: -4.0, face: 0, t: 0, sw: 0, look: look([230, 180, 60], [120, 50, 40], SKINS[2], null),
+    label: "Mama Put", tag: [255, 214, 120], kind: "vendor", speed: 0, patrol: false, info: {},
+    last: -1, owes: 0, mode: "stay", inside: false, talking: false, cool: 0, seenPlan: null
+  });
+
+
+  // Okada stand (left of the gate) and keke park (right of the gate): parked vehicles you cannot walk through.
+  placeVehicle("okada", -7.6, 12.4, Math.PI / 2, [210, 60, 45], { x0: -8.6, x1: -6.6, z0: 12.05, z1: 12.75 });
+  placeVehicle("okada", -7.6, 13.5, Math.PI / 2, [45, 120, 200], { x0: -8.6, x1: -6.6, z0: 13.15, z1: 13.85 });
+  box(-7.6, 2.3, 13.0, 1.6, 0.08, 1.4, [230, 80, 50]);        // stand umbrella
+  box(-6.1, 1.1, 13.0, 0.05, 1.1, 0.05, [95, 65, 35]);
+  box(-9.1, 1.1, 13.0, 0.05, 1.1, 0.05, [95, 65, 35]);
+  placeVehicle("keke", 7.8, 12.9, -Math.PI / 2, [245, 200, 30], { x0: 6.6, x1: 9.0, z0: 12.2, z1: 13.6 });
+  box(7.8, 2.9, 12.9, 1.5, 0.08, 1.3, [40, 150, 80]);         // keke park shade
+  box(6.2, 1.4, 12.9, 0.05, 1.4, 0.05, [95, 65, 35]);
+  box(9.4, 1.4, 12.9, 0.05, 1.4, 0.05, [95, 65, 35]);
+
+  // Street characters are real NPCs, not painted-on scenery. Their arms animate and they can react to the player.
+  const vulcaniser = {
+    x: -8.4, z: 21.65, face: Math.PI, t: 0, sw: 0, look: look([35, 115, 75], [35, 45, 100], SKINS[1], null),
+    label: "Vulcaniser", tag: [255, 210, 150], kind: "streetWorker", speed: 0, patrol: false, info: {},
+    last: -1, owes: 0, mode: "work", inside: false, talking: false, cool: 0, seenPlan: "street", armR: -0.45,
+    streetRole: "vulcaniser", workClock: 0, calloutCooldown: 2, bubble: null
+  };
+  const cornSeller = {
+    x: 8.25, z: 21.65, face: Math.PI, t: 0, sw: 0, look: look([185, 55, 115], [50, 55, 120], SKINS[2], null),
+    label: "Mama Corn", tag: [255, 220, 120], kind: "streetVendor", speed: 0, patrol: false, info: {},
+    last: -1, owes: 0, mode: "sell", inside: false, talking: false, cool: 0, seenPlan: "street", armR: -0.25,
+    streetRole: "corn", workClock: 1, calloutCooldown: 1, bubble: null
+  };
+  npcs.push(vulcaniser, cornSeller);
+
+  // Okada rider and keke driver wait at their stands; the pure-water hawker walks along the school side of the street.
+  function streetNpc(x, z, face, lk, label, tag, role, extra) {
+    const n = Object.assign({
+      x: x, z: z, face: face, baseFace: face, t: 0, sw: 0, look: lk, label: label, tag: tag, kind: "streetWorker", speed: 0, patrol: false, info: {},
+      last: -1, owes: 0, mode: "work", inside: false, talking: false, cool: 0, seenPlan: "street",
+      streetRole: role, workClock: rand(0, 3), calloutCooldown: rand(2, 6), bubble: null
+    }, extra || {});
+    npcs.push(n);
+    return n;
+  }
+  streetNpc(-5.6, 13.0, Math.PI / 2, look([235, 200, 40], [40, 40, 50], SKINS[0], null), "Okada Rider", [255, 225, 120], "okada");
+  streetNpc(5.7, 13.0, -Math.PI / 2, look([250, 200, 30], [40, 60, 50], SKINS[3], null), "Keke Driver", [255, 225, 120], "keke");
+  streetNpc(0, 13.9, Math.PI / 2, look([60, 150, 200], [50, 50, 60], SKINS[2], null, null, [90, 170, 240]), "Water Seller", [170, 225, 255], "hawker", { dir: 1, kind: "streetVendor" });
+
+  // ---------- TRAFFIC: okadas, kekes, cars and danfo buses drive along the street ----------
+  const traffic = [];
+  let dead = false;
+  const deadEl = document.getElementById("dead");
+  function killPlayer(v) {
+    dead = true;
+    keys.up = keys.down = keys.left = keys.right = false;
+    const what = { okada: "an okada", keke: "a keke", car: "a car", danfo: "a danfo bus" }[v.type];
+    document.getElementById("deadMsg").textContent = "You were hit by " + what + ". Shine your eye next time! The game will restart" + (DEATH_MONEY_LOSS > 0 ? " and you lose " + Math.round(DEATH_MONEY_LOSS * 100) + "% of your money." : ".");
+    deadEl.style.display = "flex";
+  }
+  document.getElementById("deadBtn").addEventListener("click", () => {
+    addMoney(-Math.floor(money * DEATH_MONEY_LOSS));          // the price of getting hit (money is saved by addMoney)
+    try { location.reload(); } catch (e) { document.getElementById("deadMsg").textContent = "Please refresh the page to restart."; }
+  });
+  const LANES = [{ z: 19.0, dir: 1 }, { z: 15.1, dir: -1 }];
+  let trafficTimer = 0.5;
+  function spawnVehicle() {
+    const lane = LANES[Math.floor(Math.random() * LANES.length)];
+    const r = Math.random();
+    const type = r < 0.35 ? "okada" : r < 0.65 ? "keke" : r < 0.85 ? "car" : "danfo";
+    const x = lane.dir > 0 ? -17 : 17;
+    if (traffic.some((v) => v.lane === lane && Math.abs(v.x - x) < 8)) return;   // no room at the edge yet
+    const s = { shirt: pickOne(SHIRTS), skin: pickOne(SKINS), cap: pickOne(SHIRTS), pax: Math.random() < 0.5 ? pickOne(SHIRTS) : null, skin2: pickOne(SKINS) };
+    const speed = VEH[type].speed * rand(0.85, 1.15);
+    traffic.push({ type: type, lane: lane, dir: lane.dir, x: x, z: lane.z, face: lane.dir > 0 ? Math.PI / 2 : -Math.PI / 2,
+      speed: speed, cur: speed, len: VEH[type].len, wid: VEH[type].wid, reckless: Math.random() < 0.2, parts: VEH[type].build(pickOne(VCOLOURS[type]), s), bubble: null, honkCd: 0, shoutCd: rand(1, 4) });
+  }
+  function updateTraffic(dt) {
+    trafficTimer -= dt;
+    if (trafficTimer <= 0) { trafficTimer = rand(1.2, 3.2); spawnVehicle(); }
+    const walkers = npcs.filter((n) => !n.inside && !n.inRoom && n.kind !== "vendor");
+    if (scene === "outside") walkers.push(pl);
+    for (const v of traffic) {
+      let personBrake = false, carBrake = false, warn = false;
+      for (const w of walkers) {                                    // look for anyone in the lane ahead
+        const ahead = (w.x - v.x) * v.dir;
+        if (ahead > 0 && Math.abs(w.z - v.z) < 1.0) {
+          if (ahead < v.len + 2.0) personBrake = true;              // close: a careful driver brakes
+          if (ahead < v.len + 8) warn = true;                       // not so close: every driver honks
+        }
+      }
+      for (const u of traffic) {                                    // do not drive through the vehicle in front
+        if (u === v || u.lane !== v.lane) continue;
+        const gap = (u.x - v.x) * v.dir;
+        if (gap > 0 && gap < v.len + u.len + 0.8) carBrake = true;
+      }
+      let stop = carBrake || (personBrake && !v.reckless);          // reckless drivers never brake for people
+      if (v.parent) {                                               // the parent's car stops in front of the gate and waits
+        if (v.x <= v.stopX + 0.9) { stop = true; v.parked = v.cur < 0.4; }
+        v.cryCd -= dt;
+        if (v.cryCd <= 0 && scene === "outside") { say(v, v.parked ? pickOne(["Oya come! I don reach o!", "Hurry, the traffic is mad!", "My pikin, enter the car!"]) : "I dey come, I dey come!", 2.6); v.cryCd = 5; }
+      }
+      v.cur += ((stop ? 0 : v.speed) - v.cur) * Math.min(1, dt * 5);
+      v.x += v.dir * v.cur * dt;
+      v.honkCd -= dt; v.shoutCd -= dt;
+      const near = scene === "outside" && Math.abs(v.x - pl.x) < 10;
+      if (warn && v.honkCd <= 0 && near) { say(v, v.reckless ? "⚠️ Pin pin pin!!" : pickOne(["Pin pin!", "Oga look road!", "Wetin dey do you?!", "Comot for road!", "Ah-ah! Chai!"]), 2); v.honkCd = 4; }
+      if (v.type === "danfo" && v.shoutCd <= 0 && near) { say(v, pickOne(["Ojuelegba! Ojuelegba!", "Oshodi! Oya enter!", "Yaba, Yaba, Yaba!"]), 2.4); v.shoutCd = rand(6, 10); }
+      // a moving vehicle that touches you kills you (a stopped one cannot)
+      if (!dead && scene === "outside" && !dialogue && !trip && v.cur > 1.5 && Math.abs(pl.x - v.x) < v.len + 0.25 && Math.abs(pl.z - v.z) < v.wid + 0.25) killPlayer(v);
+    }
+    for (let i = traffic.length - 1; i >= 0; i--) if (Math.abs(traffic[i].x) > 18) traffic.splice(i, 1);
+  }
+  let roadWarned = false;
+  function updateRoadWarning() {                                 // a warning as you step out of the school gate
+    if (scene !== "outside") return;
+    if (pl.z > 12.2 && !roadWarned) { roadWarned = true; flashHint("⚠️ You won enter road now ooo, shine your eye well well", 4500); }
+    if (pl.z < 10.5) roadWarned = false;
+  }
+  function addVehicle(list, v) {
+    for (const q of v.parts) {
+      const w = rotY([q[0], q[1], q[2]], v.face);
+      list.push({ p: [v.x + w[0], 0.5 + w[1], v.z + w[2]], h: [q[3], q[4], q[5]], c: q[6], r: v.face });
+    }
+  }
+
+  // called once, at the moment the plan changes (for example, the assembly bell)
+  function changePlan(n, plan, onTime) {
+    n.mode = plan;
+    n.seated = false; n.inRoom = false; n.armR = null;     // whoever walks out of class stands up properly (legs visible!)
+    if (plan === "class" && (n.patrol || Math.random() < n.skipChance)) n.mode = "wander";
+    n.lateT = 0;
+    // A late teacher: wanders for a while, so the classroom has no teacher (dubbing time!). Not the principal, not Mr Kasala.
+    if (plan === "class" && n.mode === "class" && n.kind === "teacher" && !n.info.principal && !onTime && Math.random() < 0.6) { n.mode = "wander"; n.lateT = rand(22, 38); }
+    if (n.inside) {                       // come back out where we went in
+      n.inside = false;
+      n.x = rand(-0.5, 0.5);
+      n.z = n.hideAt === "gate" ? 10.6 : -3.4;
+    }
+    n.giveUp = 30;
+    if (n.mode === "wander") { pickTarget(n); n.wait = rand(0, 2); }
+    else if (n.mode === "class") { n.tx = rand(-0.5, 0.5); n.tz = -3.4; }
+    else if (n.mode === "home") { n.tx = rand(-1, 1); n.tz = 10.6; }
+    else if (n.mode === "assembly") {
+      if (n.kind === "student") { n.tx = 4 + (n.slot % 3) * 1.6; n.tz = 3 + Math.floor(n.slot / 3) * 1.6; }
+      else if (n.info.principal) { n.tx = 5.6; n.tz = 1.5; }
+      else { n.tx = 9.2; n.tz = 2.5 + n.slot * 1.6; }
+    }
+  }
+
+  function updateNpc(n, dt) {
+    if (n.cool > 0) n.cool -= dt;
+    if (n.talking) { n.face = Math.atan2(pl.x - n.x, pl.z - n.z); animate(n, false, dt, 10); return; }
+    if (n.streetRole) {
+      n.workClock += dt;
+      n.calloutCooldown -= dt;
+      if (n.streetRole === "vulcaniser") {
+        // Repeatedly pumps/works on a tyre: arm moves in short, varied strokes.
+        n.armR = -0.35 + Math.sin(n.workClock * 5.2) * 0.42;
+        n.face = Math.PI;
+        if (n.calloutCooldown <= 0 && scene === "outside" && Math.hypot(pl.x - n.x, pl.z - n.z) < 4.4 && !dialogue) {
+          say(n, "Spoilt pikin, you no fit greet elders?", 2.8);
+          n.calloutCooldown = 8;
+        }
+      } else if (n.streetRole === "okada" || n.streetRole === "keke") {
+        // Waiting for a customer: waves an arm and calls out when you come near.
+        n.face = n.baseFace;
+        n.armR = -0.2 + Math.sin(n.workClock * 2.4) * 0.6;
+        if (n.calloutCooldown <= 0 && scene === "outside" && Math.hypot(pl.x - n.x, pl.z - n.z) < 6 && !dialogue) {
+          say(n, pickOne(n.streetRole === "okada" ? ["Oga! Okada! Where you dey go?", "Boss, I fit take you go anywhere!", "Okada! Fast fast!"] : ["Keke! Keke! Enter, ma!", "Oya, Keke dey go!", "Customer! I carry you comfortable!"]), 2.6);
+          n.calloutCooldown = rand(6, 9);
+        }
+      } else if (n.streetRole === "hawker") {
+        // Walks back and forth along the school side of the street selling pure water.
+        n.x += n.dir * 1.3 * dt;
+        if (n.x > 4.5) n.dir = -1;
+        if (n.x < -4.5) n.dir = 1;
+        n.face = n.dir > 0 ? Math.PI / 2 : -Math.PI / 2;
+        if (n.calloutCooldown <= 0 && scene === "outside" && !dialogue) {
+          say(n, pickOne(["Pure water! Cold-cold ₦20!", "Pure water ooo!", "Sachet water! Come and buy!"]), 2.4);
+          n.calloutCooldown = rand(5, 8);
+        }
+      } else {
+        // The corn seller calls out and waves to passers-by.
+        n.armR = -0.2 + Math.sin(n.workClock * 3.1) * 0.55;
+        n.face = Math.PI;
+        if (n.calloutCooldown <= 0 && scene === "outside" && !dialogue) {
+          say(n, pickOne(["Come buy corn ooo!", "Sweet sweet corn!", "Hot roasted corn! Come and buy!", "Corn wey sweet, come buy ooo!"]), 2.4);
+          n.calloutCooldown = rand(4.5, 7.0);
+        }
+      }
+      animate(n, n.streetRole === "hawker", dt, 10);
+      return;
+    }
+    if (n.kind === "vendor") { animate(n, false, dt, 10); return; }
+    if (n.goal) {                          // a scripted order: walk there and wait
+      const sx = n.goal.x - n.x, sz = n.goal.z - n.z;
+      if (Math.hypot(sx, sz) < 0.2) { n.face = n.goal.face; animate(n, false, dt, 10); return; }
+      const went = walk(n, sx, sz, n.speed * 1.5, dt);
+      animate(n, went, dt, 10);
+      return;
+    }
+    if (n.seated && !n.inRoom) n.seated = false;            // safety net: only people in the classroom can be seated
+    const plan = PLAN[clock.period] || "wander";
+    if (plan !== n.seenPlan) { n.seenPlan = plan; changePlan(n, plan); }
+    if (n.inside) return;
+
+    if (n.mode === "wander") {
+      if (n.lateT > 0) { n.lateT -= dt; if (n.lateT <= 0) { n.lateT = 0; changePlan(n, "class", true); return; } }   // the late teacher finally heads to class
+      if (n.wait > 0) { n.wait -= dt; animate(n, false, dt, 10); return; }
+      n.giveUp -= dt;
+      const dx = n.tx - n.x, dz = n.tz - n.z;
+      if (Math.hypot(dx, dz) < 0.2 || n.giveUp <= 0) {
+        pickTarget(n);
+        n.wait = rand(1, 3);
+        animate(n, false, dt, 10);
+        return;
+      }
+      const moved = walk(n, dx, dz, n.speed, dt);
+      animate(n, moved, dt, 10);
+      if (!moved) pickTarget(n);
+      return;
+    }
+
+    // class, home, assembly: go to the spot, then do the arrival thing
+    n.giveUp -= dt;
+    const gx = n.tx - n.x, gz = n.tz - n.z;
+    if (Math.hypot(gx, gz) < 0.25 || n.giveUp <= 0) {
+      n.x = n.tx; n.z = n.tz;
+      if (n.mode === "class" || n.mode === "home") {
+        n.inside = true;
+        n.hideAt = n.mode === "home" ? "gate" : "door";
+      } else {
+        if (n.lookAt) n.face = Math.atan2(n.lookAt.x - n.x, n.lookAt.z - n.z);
+        else n.face = n.info.principal ? 0 : n.kind === "student" ? Math.PI : -Math.PI / 2;
+      }
+      animate(n, false, dt, 10);
+      return;
+    }
+    const moved2 = walk(n, gx, gz, n.speed, dt);
+    animate(n, moved2, dt, 10);
+  }
+
+  // ---------- 8. SCHOOL CLOCK ----------
+  // times are "minutes since midnight": 450 = 7:30 AM, 780 = 1:00 PM
+  const SCHEDULE = [
+    { at: 450, name: "Arrival" },
+    { at: 480, name: "Assembly" },
+    { at: 540, name: "Class 1" },
+    { at: 600, name: "Class 2" },
+    { at: 660, name: "Break" },
+    { at: 690, name: "Class 3" },
+    { at: 750, name: "Class 4" },
+    { at: 810, name: "Closing" }
+  ];
+  const DAY_START = 450, DAY_END = 870;
+  const MINUTES_PER_SECOND = 1; // game minutes that pass per real second
+  const clock = { min: DAY_START, day: 1, period: "", bell: 0 };
+  const hud = document.getElementById("hud");
+
+  function fmt(min) {
+    const h = Math.floor(min / 60);
+    const m = Math.floor(min % 60);
+    return ((h % 12) || 12) + ":" + (m < 10 ? "0" : "") + m + (h < 12 ? " AM" : " PM");
+  }
+
+  function updateClock(dt) {
+    clock.min += dt * MINUTES_PER_SECOND;
+    if (clock.min >= DAY_END) { clock.min = DAY_START; clock.day += 1; }
+    let name = SCHEDULE[0].name;
+    for (const p of SCHEDULE) if (clock.min >= p.at) name = p.name;
+    if (name !== clock.period) { clock.period = name; clock.bell = 3; }
+    clock.bell = Math.max(clock.bell - dt, 0);
+    const text = (clock.bell > 0 ? "🔔 " : "") + "Day " + clock.day + " · " + fmt(clock.min) + " · " + clock.period;
+    if (hud.textContent !== text) hud.textContent = text;
+  }
+
+  // ---------- 9. MONEY AND TALKING ----------
+  let money = 0;
+  let floaters = [];
+  const cashEl = document.getElementById("cash");
+  try { money = Number(localStorage.getItem("naijaHighMoney")) || 0; } catch (e) { money = 0; }
+  cashEl.textContent = "₦" + money;
+
+  function addMoney(delta) {
+    const before = money;
+    money = Math.max(0, money + delta);
+    const real = money - before;
+    cashEl.textContent = "₦" + money;
+    try { localStorage.setItem("naijaHighMoney", String(money)); } catch (e) { /* saving is optional */ }
+    if (real !== 0) {
+      floaters.push({ text: (real > 0 ? "+" : "-") + "₦" + Math.abs(real), color: real > 0 ? "120,255,140" : "255,120,120", life: 1.6 });
+    }
+  }
+
+  const talkBtn = document.getElementById("talk");
+  const padEl = document.getElementById("pad");
+  const dlg = document.getElementById("dlg");
+  const TALK_DISTANCE = 2.2;
+  let dialogue = null; // the NPC we are talking to, or null
+  let nearNpc = null;  // the NPC close enough to talk to, or null
+
+  function showLine(name, text, choices) {
+    document.getElementById("dname").textContent = name;
+    document.getElementById("dtext").textContent = text;
+    const box = document.getElementById("dchoices");
+    box.textContent = "";
+    for (const c of choices) {
+      const b = document.createElement("button");
+      b.textContent = c.text;
+      b.addEventListener("click", () => pick(c));
+      box.appendChild(b);
+    }
+  }
+
+  function pick(c) {
+    if (c.socialAction) { handleSocialChoice(c); return; }
+    if (c.copyAction) { handleCopy(c); return; }
+    if (c.homeAction) { handleHome(c); return; }
+    if (c.dubAction) { handleDub(c); return; }
+    // Crush conversations use the same NPC dialogue pattern as everyone else:
+    // Zara speaks, the player chooses their own line, then Zara answers.
+    if (c.crushSay) {
+      showLine("YOU", c.crushSay, [{ text: "Continue", crushResponse: c }]);
+      return;
+    }
+    if (c.crushResponse) {
+      const r = c.crushResponse;
+      if (crushToday.day !== clock.day) crushToday = { day: clock.day };            // new school day, fresh chances
+      const confBefore = crushConfidence;
+      const fresh = (k) => (crushToday[k] ? false : (crushToday[k] = true));        // true only the FIRST time today
+      if (r.crushEffect === "kind" && fresh("kind")) { crushConfidence += 1; friendship++; }
+      if (r.crushEffect === "funny" && fresh("funny")) { crushConfidence++; friendship++; popularity++; }
+      if (r.crushEffect === "shy" && fresh("shy")) crushConfidence++;
+      if (r.crushEffect === "contact" && !crushNpc.contactExchanged) { crushNpc.contactExchanged = true; friendship += 2; crushConfidence += 2; }
+      if (perkIs("charming") && crushConfidence > confBefore) crushConfidence++;   // Charming: +1 whenever you win crush points
+      showLine(crushNpc.label, r.crushReply, r.afterChoices || [
+        { text: "Wetin you like doing after school?", crushSay: "Wetin you like doing after school?", crushReply: "I dey gist with my friends, listen to music, and sometimes read. You nko?", crushEffect: "kind" },
+        ...(crushNpc.contactExchanged ? [] : [{ text: "📱 Make we exchange contacts?", crushSay: "You go mind if we exchange contacts?", crushReply: "I no mind. Make we exchange as friends.", crushEffect: "contact" }]),
+        { text: "I go see you later", crushEnd: true }
+      ]);
+      return;
+    }
+    if (c.crushEnd) {
+      showLine("YOU", "Alright, see you later.", [{ text: "Close conversation", closeNow: true }]);
+      return;
+    }
+    if (c.closeNow) { closeDialogue(); return; }
+    if (c.menu) { const sc = dialogue.streetRole === "hawker" ? hawkerShop() : dialogue.streetRole === "corn" ? cornShop() : SCENARIOS.shop(dialogue); showLine(dialogue.label, sc.line, sc.choices); return; }
+    if (c.buy) {
+      if (money >= c.buy.price) {
+        addMoney(-c.buy.price);
+        addEnergy(c.buy.energy);
+        showLine(dialogue.label, c.buy.reply, [{ text: "Buy more", menu: true }, { text: "Leave" }]);
+      } else {
+        showLine(dialogue.label, "Eh, your money no reach.", [{ text: "Back", menu: true }, { text: "Leave" }]);
+      }
+      return;
+    }
+    if (c.gain) addMoney(c.gain);
+    if (c.pop) popularity += c.pop;
+    if (c.owe) dialogue.owes = 80;
+    if (c.repay) dialogue.owes = 0;
+    if (c.reply) showLine(dialogue.label, c.reply, [{ text: "OK" }]);
+    else closeDialogue();
+  }
+
+  // ---------- STEP 14: PHYSICAL BREAK-TIME & SOCIAL LIFE ----------
+  const socialBtn = document.getElementById("socialBtn");
+  let popularity = 0, friendship = 0, crushConfidence = 0, truthDarePlayed = 0;
+  const socialActor = { label: "Classmates", talking: true, cool: 0, owes: 0 };
+  let truthDareRound = 0;
+  let nearBall = false;
+  const ball = { x: -6.2, z: 2.8, vx: 0, vz: 0, active: true };
+
+  // Truth or Dare works outside at Break, or inside during a lesson. Never on Zara (she has her own talk).
+  const socialOk = () => !!(!dialogue && !lesson && !pl.seated && nearNpc && nearNpc.kind === "student" && !nearNpc.specialCrush &&
+    ((scene === "outside" && clock.period === "Break") || (scene === "class" && clock.period.startsWith("Class"))));
+
+  // Social points: loaded on start, saved whenever they change, and shown under the energy bar.
+  let crushToday = { day: -1 };
+  const socialEl = document.getElementById("social");
+  let socialSig = "";
+  try {
+    const sv = JSON.parse(localStorage.getItem("naijaHighSocial") || "{}");
+    popularity = Number(sv.p) || 0; friendship = Number(sv.f) || 0; crushConfidence = Number(sv.c) || 0;
+    crushNpc.contactExchanged = !!sv.k;
+  } catch (e) { /* no saved social life yet */ }
+  function syncSocial() {
+    const sig = [friendship, popularity, crushConfidence, crushNpc.contactExchanged ? 1 : 0].join("|");
+    if (sig === socialSig) return;
+    socialSig = sig;
+    try { localStorage.setItem("naijaHighSocial", JSON.stringify({ f: friendship, p: popularity, c: crushConfidence, k: !!crushNpc.contactExchanged })); } catch (e) { /* saving is optional */ }
+    socialEl.textContent = "💗 Friends " + friendship + " · ⭐ Pop " + popularity + " · 😳 Crush " + crushConfidence;
+    socialEl.style.display = friendship + popularity + crushConfidence > 0 ? "block" : "none";
+  }
+
+  function socialOpen() {
+    if (!socialOk()) {
+      flashHint("Walk up to a classmate (outside at break, or in class), then tap Truth or Dare.", 3000); return;
+    }
+    if (clock.period !== "Break" && Math.random() < 0.25) {
+      flashHint("The teacher is teaching. Try again at break.", 3000); return;
+    }
+    dialogue = socialActor; socialActor.talking = true;
+    keys.up = keys.down = keys.left = keys.right = false;
+    dlg.style.display = "block"; padEl.style.display = "none"; talkBtn.style.display = "none";
+    showLine("TUNDE", "Oya, truth or dare? Pick one.", [
+      { text: "🤐 Truth", socialAction: "truth" },
+      { text: "🔥 Dare", socialAction: "dare" },
+      { text: "I pass this round", socialAction: "pass" },
+      { text: "I wan comot", socialAction: "leave" }
+    ]);
+  }
+  function handleSocialChoice(c) {
+    if (c.socialAction === "leave") { closeDialogue(); return; }
+    if (c.socialAction === "truth") {
+      truthDarePlayed++;
+      showLine("CHIDI", "Truth: who you like for this school? No lie o!", [
+        { text: "I get person for mind 👀", socialAction: "truthCrush" },
+        { text: "I no like anybody", socialAction: "truthNobody" },
+        { text: "I no wan talk am", socialAction: "truthPass" }
+      ]); return;
+    }
+    if (["truthCrush", "truthNobody", "truthPass"].includes(c.socialAction)) {
+      if (c.socialAction === "truthCrush") {
+        friendship++; popularity += 1 + (perkIs("playful") ? 1 : 0);
+        showLine("FEMI", "Ehen! Who be the person? 😏", [
+          { text: "I no go mention name", socialAction: "again" },
+          { text: "Make una guess", socialAction: "guess" },
+          { text: "Next question abeg", socialAction: "again" }
+        ]); return;
+      }
+      showLine("AMAKA", c.socialAction === "truthNobody" ? "Hmm. We go believe you sha. Next!" : "No wahala. You no must answer everything.", [
+        { text: "Next round", socialAction: "again" }, { text: "I wan comot", socialAction: "leave" }
+      ]); return;
+    }
+    if (c.socialAction === "guess") {
+      showLine("TUNDE", "Na " + crushNpc.label + " abi? 😂", [
+        { text: "Una too like gist", socialAction: "again" },
+        { text: "Next question abeg", socialAction: "again" }
+      ]); return;
+    }
+    if (c.socialAction === "dare") {
+      truthDarePlayed++;
+      showLine("FEMI", "Your dare: do Mr Kasala voice. You fit do am?", [
+        { text: "STUDENT! IS THIS A SCHOOL OR MOTOR PARK?!", socialAction: "impression" },
+        { text: "I go sing school anthem instead", socialAction: "sing" },
+        { text: "I no do this one", socialAction: "pass" }
+      ]); return;
+    }
+    if (c.socialAction === "impression") {
+      popularity += 2 + (perkIs("playful") ? 1 : 0); friendship++;
+      showLine("CHIDI", "😂😂 Omo! You sound exactly like am!", [{text:"Another round",socialAction:"again"},{text:"I wan comot",socialAction:"leave"}]); return;
+    }
+    if (c.socialAction === "sing") {
+      popularity += 1 + (perkIs("playful") ? 1 : 0); friendship++;
+      showLine("AMAKA", "Your voice no bad o! Tunde, your turn!", [{text:"Another round",socialAction:"again"},{text:"I wan comot",socialAction:"leave"}]); return;
+    }
+    if (c.socialAction === "pass") {
+      showLine("AMAKA", "No wahala. Nobody must do wetin dem no want.", [{text:"Next round",socialAction:"again"},{text:"I wan comot",socialAction:"leave"}]); return;
+    }
+    if (c.socialAction === "again") { showLine("TUNDE", "Oya, next round. Truth or dare?", [{text:"Truth",socialAction:"truth"},{text:"Dare",socialAction:"dare"},{text:"I wan comot",socialAction:"leave"}]); return; }
+  }
+  socialBtn.addEventListener("click", socialOpen);
+
+  // ---------- ASSIGNMENT COPYING (once per school day) ----------
+  // A classmate offers their assignment. You can copy it (watch the teacher!), do it yourself, or walk away.
+  let assignmentDay = -1;                      // the school day the assignment chance was last used
+  let copying = null;                          // { mate, teacher, face0, progress, round, watching }
+  const COPY_GOAL = 3, COPY_ROUNDS = 4;
+  const CATCH = { fast: [0.1, 0.7], careful: [0, 0.2] };   // chance of being caught: [teacher at the board, teacher looking]
+  const assignmentReady = () => scene === "class" && assignmentDay !== clock.day && npcs.some((n) => n.inRoom && n.kind === "teacher");
+  function copyOffer() {
+    return { line: "Psst... the assignment is due today o! You do am?", choices: [
+      { text: "😬 No o. Abeg, make I copy yours", copyAction: "start" },
+      { text: "📖 I go do am myself", copyAction: "own" },
+      { text: "Not my business", reply: "Okay o. Na your matter." }
+    ] };
+  }
+  function copyEnd(result) {
+    const t = copying.teacher, mate = copying.mate;
+    t.face = copying.face0;                    // the teacher turns back
+    assignmentDay = clock.day;                 // today's chance is used up, whatever happened
+    copying = null;
+    if (result === "done") {
+      addMoney(25);
+      showLine(mate.label, "Haha, you finish am! Try to understand am too o, exam no dey copy. (+₦25)", [{ text: "OK", closeNow: true }]);
+    } else if (result === "caught") {
+      say(t, "STUDENT! You are copying?!", 3);
+      addMoney(-60); popularity = Math.max(0, popularity - 1); friendship = Math.max(0, friendship - 1);
+      showLine(t.label, "Copying is cheating. ₦60 fine, and your mates lose respect for you. Do your own work next time.", [{ text: "Sorry, " + (t.label.startsWith("Mr ") ? "sir" : "ma"), closeNow: true }]);
+    } else if (result === "bell") {
+      showLine(mate.label, "The teacher left. The assignment chance is gone for today.", [{ text: "OK", closeNow: true }]);
+    } else {
+      showLine(t.label, "Time up. You no finish, so no marks today.", [{ text: "OK", closeNow: true }]);
+    }
+  }
+  function copyRound() {
+    const c = copying;
+    if (!c.teacher.inRoom || scene !== "class") { copyEnd("bell"); return; }
+    c.round++;
+    if (c.round > COPY_ROUNDS) { copyEnd("late"); return; }
+    c.watching = Math.random() < 0.45;
+    c.teacher.face = c.watching ? Math.atan2(pl.x - c.teacher.x, pl.z - c.teacher.z) : c.face0;
+    say(c.teacher, c.watching ? "Eyes on your books!" : "(writing on the board)", 2);
+    showLine("ASSIGNMENT · Round " + c.round + "/" + COPY_ROUNDS + " · Copied " + c.progress + "/" + COPY_GOAL,
+      c.watching ? "👀 " + c.teacher.label + " is looking at the class!" : "✍️ " + c.teacher.label + " is facing the board.", [
+      { text: "✍️ Copy fast (+2)", copyAction: "fast" },
+      { text: "🤏 Copy small small (+1)", copyAction: "careful" },
+      { text: "⏳ Wait one round", copyAction: "wait" }
+    ]);
+  }
+  function handleCopy(c) {
+    const a = c.copyAction;
+    if (a === "start") {
+      copying = { mate: dialogue, teacher: npcs.find((n) => n.inRoom && n.kind === "teacher"), progress: 0, round: 0, watching: false };
+      copying.face0 = copying.teacher.face;
+      copyRound(); return;
+    }
+    if (a === "fast" || a === "careful" || a === "wait") {
+      if (!copying.teacher.inRoom) { copyEnd("bell"); return; }
+      if (a !== "wait") {
+        if (Math.random() < Math.min(0.95, CATCH[a][copying.watching ? 1 : 0] * levelOf().catchMul)) { copyEnd("caught"); return; }
+        copying.progress += a === "fast" ? 2 : 1;
+        if (copying.progress >= COPY_GOAL) { copyEnd("done"); return; }
+      }
+      copyRound(); return;
+    }
+    if (a === "own") {
+      const t = npcs.find((n) => n.inRoom && n.kind === "teacher");
+      if (!t || !SUBJECT_QUIZ[t.label]) { showLine(dialogue.label, "Ah, the teacher is not in. Try again later.", [{ text: "OK", closeNow: true }]); return; }
+      const sc = SCENARIOS[pickOne(SUBJECT_QUIZ[t.label])]();
+      copying = { teacher: t, mate: dialogue, face0: t.face };
+      showLine("YOUR ASSIGNMENT · " + t.label, sc.line, sc.choices.map((ch) => ({ text: ch.text, copyAction: "ownAnswer", ok: !!ch.gain })));
+      return;
+    }
+    if (a === "ownAnswer") {
+      const t = copying.teacher; copying = null;
+      assignmentDay = clock.day;
+      if (c.ok) { addMoney(60); friendship++; showLine(t.label, "Excellent! Honest work pays. (+₦60)", [{ text: "OK", closeNow: true }]); }
+      else { addMoney(10); showLine(t.label, "Not correct, but you tried. Honest effort counts. (+₦10)", [{ text: "OK", closeNow: true }]); }
+    }
+  }
+
+  // ----- dialogue content -----
+  const pickOne = (list) => list[Math.floor(Math.random() * list.length)];
+  const int = (a, b) => Math.floor(rand(a, b + 1)); // whole number from a to b
+  function shuffle(list) {
+    for (let i = list.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const tmp = list[i]; list[i] = list[j]; list[j] = tmp;
+    }
+    return list;
+  }
+
+  function quizScenario(question, correct, wrongs, reward) {
+    const options = shuffle([correct].concat(wrongs));
+    return {
+      line: question,
+      choices: options.map((o) => o === correct
+        ? { text: String(o), gain: reward, reply: "Correct! Well done." }
+        : { text: String(o), reply: "No o. The answer is " + correct + ". Go and read!" })
+    };
+  }
+
+  const GOSSIP = [
+    { l: "You heard? Mr Kasala caught three people hiding behind the toilet during assembly!", r: "Imagine! The cane did not rest that day." },
+    { l: "They say the canteen will add free meat to the jollof on Friday.", r: "Na lie! But I go dey hope." },
+    { l: "Mrs Shukudi's wig fell off during English class yesterday. I nearly died!", r: "Please don't tell her I told you!" },
+    { l: "Somebody wrote 'x equals trouble' on Mr Opon's board and he is looking for the culprit.", r: "It was not me. I swear." }
+  ];
+  const ENGLISH = [
+    { q: "Complete the proverb: A stitch in time saves ___", a: "nine", w: ["ten", "a shirt"] },
+    { q: "What is the opposite of 'generous'?", a: "stingy", w: ["kind", "wealthy"] },
+    { q: "Which of these is a proper noun?", a: "Lagos", w: ["city", "river"] },
+    { q: "What is the plural of 'child'?", a: "children", w: ["childs", "childrens"] },
+    { q: "Which word is a verb?", a: "dance", w: ["table", "green"] },
+    { q: "What is the past tense of 'go'?", a: "went", w: ["goed", "gone"] }
+  ];
+  const HOME_EC = [
+    { q: "Which nutrient builds the body?", a: "Protein", w: ["Sugar", "Salt"] },
+    { q: "What must you do before you cook?", a: "Wash your hands", w: ["Wear shoes", "Open the window"] },
+    { q: "Which food gives the most energy?", a: "Yam", w: ["Pepper", "Water"] },
+    { q: "Which tool measures liquid in cooking?", a: "A measuring jug", w: ["A frying pan", "A ladle"] },
+    { q: "What keeps food from spoiling?", a: "A refrigerator", w: ["A radio", "A mat"] }
+  ];
+
+  const SCENARIOS = {
+    lecture: () => ({
+      line: pickOne(["Student, punctuality is the soul of success.", "Reading is the key. Have you read today?", "A good name is better than money. Remember that."]),
+      choices: [{ text: "Yes, sir", reply: "Good. Carry on." }, { text: "Noted, sir", reply: "Noted is not enough. Practise!" }]
+    }),
+    inspect: () => ({
+      line: "Show me your school ID card.",
+      choices: [{ text: "Here, sir", reply: "Hmm. Acceptable." }, { text: "I forgot it, sir", reply: "Forgot? Then forget your break time!" }]
+    }),
+    shop: () => ({
+      line: "Welcome, my dear! Hot food just came out. What will you chop today?",
+      choices: [
+        { text: "Pure water · ₦20 (+8 energy)", buy: { price: 20, energy: 8, reply: "Cold and clean!" } },
+        { text: "Puff-puff · ₦50 (+20 energy)", buy: { price: 50, energy: 20, reply: "Hot and sweet. Enjoy!" } },
+        { text: "Jollof rice · ₦150 (+50 energy)", buy: { price: 150, energy: 50, reply: "Eat well, my pikin!" } },
+        { text: "Leave" }
+      ]
+    }),
+    help: (n) => ({
+      line: "Abeg, can you help me with this " + n.info.subject + " assignment? It is due today!",
+      choices: [
+        { text: "Help (+₦100)", gain: 100, reply: "Thank you! You're a lifesaver." },
+        { text: "Not now", reply: "Ah, okay o." }
+      ]
+    }),
+    lend: (n) => ({
+      line: "Guy, I never chop since morning. Abeg, lend me ₦50 for " + n.info.snack + ".",
+      choices: (money >= 50 ? [{ text: "Give ₦50", gain: -50, owe: true, reply: "You're a real one! I go pay you back." }] : [])
+        .concat([{ text: "I'm broke too", reply: "Ah. Na so life be." }])
+    }),
+    gossip: () => {
+      const g = pickOne(GOSSIP);
+      return { line: g.l, choices: [{ text: "Haba! Tell me more", reply: g.r }, { text: "Not my business", reply: "Okay o, mind your business." }] };
+    },
+    timesTable: () => {
+      const a = int(6, 9), b = int(6, 9);
+      return quizScenario("Quick! What is " + a + " × " + b + "? Mr Opon dey come!", a * b, [a * b - a, a * b + b], 50);
+    },
+    mathsQuiz: () => {
+      const m = int(2, 5), x = int(2, 9), c = int(1, 9);
+      return quizScenario("Solve for me: if " + m + "x + " + c + " = " + (m * x + c) + ", what is x?", x, [x + 1, x + 2], 150);
+    },
+    englishQuiz: () => { const q = pickOne(ENGLISH); return quizScenario(q.q, q.a, q.w, 150); },
+    homeEcQuiz: () => { const q = pickOne(HOME_EC); return quizScenario(q.q, q.a, q.w, 150); },
+    carry: (n) => ({
+      line: n.info.carry,
+      choices: [{ text: "Carry them (+₦150)", gain: 150, reply: "God bless you." }, { text: "Not now", reply: "Hmm, very well." }]
+    }),
+    uniform: () => ({
+      line: "Is that how you tuck your shirt? Fix yourself!",
+      choices: [{ text: "Yes, sir", reply: "Hmm. I will be watching you." }, { text: "It is the style, sir", reply: "STYLE? Is this a fashion show?" }]
+    }),
+    report: () => ({
+      line: "Have you seen any student hiding outside during class? Report them to me.",
+      choices: [{ text: "Report one (+₦100)", gain: 100, reply: "Good. Discipline is key. I will handle it." }, { text: "I saw no one, sir", reply: "Hmm. Is that so?" }]
+    }),
+    excuse: () => ({
+      line: "You were late this morning. Give me one good reason.",
+      choices: [
+        { text: "Traffic, sir", reply: "Traffic? On a footpath? Hmm." },
+        { text: "NEPA took light, sir", reply: "And your alarm clock is powered by NEPA?" },
+        { text: "I overslept, sir", reply: "At least you are honest. Do not repeat it." }
+      ]
+    }),
+    jollof: () => ({
+      line: "Taste my jollof for the school fair. Be honest. Rate it out of ten.",
+      choices: [{ text: "10 out of 10 (+₦50)", gain: 50, reply: "I knew it! Small small chops for you." }, { text: "7 out of 10", reply: "Only seven? Your mouth is spoiled." }]
+    })
+  };
+
+  function cornShop() {
+    return { line: "Mama Corn: Come buy corn ooo! Hot roasted corn, sweet sweet!", choices: [
+      { text: "Roasted corn · ₦40 (+15 energy)", buy: { price: 40, energy: 15, reply: "Hot-hot corn! Chew well, my pikin." } },
+      { text: "Corn and coconut · ₦70 (+28 energy)", buy: { price: 70, energy: 28, reply: "Ehen! Na correct combo. Enjoy!" } },
+      { text: "Good afternoon, ma", reply: "You are welcome, my pikin! Corn dey hot-hot." },
+      { text: "Leave" }
+    ] };
+  }
+  function hawkerShop() {
+    return { line: "Water Seller: Pure water! Cold-cold, only ₦20. Sachet fresh o!", choices: [
+      { text: "Buy pure water · ₦20 (+8 energy)", buy: { price: 20, energy: 8, reply: "Cold and clean! God bless you." } },
+      { text: "No, thank you", reply: "No wahala. Come back when thirst catch you!" }
+    ] };
+  }
+  function streetRide(n) {
+    const okada = n.streetRole === "okada";
+    return { line: okada ? "Okada Rider: Oga! Okada! Where you dey go? I dey fly like bird!" : "Keke Driver: Keke! Comfortable, no shaking. Enter make we go!",
+      choices: [
+        { text: okada ? "How much to Ojuelegba?" : "How much to the market?", reply: okada ? "₦500 o. For you, ₦450. Last price!" : "₦300. Traffic is free, I no go add am." },
+        { text: (okada ? "Quick spin round the block" : "Short ride round the park") + " (-₦60)", gain: -60, pop: 1,
+          reply: okada ? "Zoom! Everybody saw you arrive. Wind for face, correct!" : "Smooth smooth! Your mates see you step down like a boss." },
+        { text: "Just greeting o", reply: "Ah, you are welcome! Safe journey, pikin." }
+      ] };
+  }
+
+  function incidentGossip(n) {
+    const name = incident.culprit.label;
+    if (n === incident.culprit) {
+      return { line: "Abeg, no talk about that thing. My palm still dey pain.",
+               choices: [{ text: "Sorry o", reply: "Na life." }, { text: "Show me the palm", reply: "Go away!" }] };
+    }
+    return {
+      line: pickOne([
+        "Did you see how " + name + " was jumping? Six strokes o!",
+        "Principal Okafor said twelve next time. Twelve! I no go talk for assembly again.",
+        "Mr Kasala's cane has not had a quiet morning."
+      ]),
+      choices: [{ text: "I saw it!", reply: "Wahala! Sit down and behave." }, { text: "Poor " + name, reply: "Na so e be. Discipline dey cost." }]
+    };
+  }
+
+  // decide what this person says right now
+  function chooseScenario(n) {
+    if (n.streetRole === "vulcaniser") return { line: "Oga: Spoilt pikin, you no fit greet elders?", choices: [
+      { text: "Good afternoon, sir", reply: "Better! Good afternoon. Respect no cost anything." },
+      { text: "Sorry, oga. I dey go", reply: "Oya, go well. No dey pass elders like that." }
+    ] };
+    if (n.streetRole === "corn") return cornShop();
+    if (n.streetRole === "okada" || n.streetRole === "keke") return streetRide(n);
+    if (n.streetRole === "hawker") return hawkerShop();
+    if (n.kind === "vendor") return SCENARIOS.shop(n);
+    if (n.specialCrush) {
+      if (n.cool > 0) return { line: pickOne(["We just talked o. Let me breathe small!", "Ah-ah, you again? Give me small time."]), choices: [{ text: "OK" }] };
+      const met = !!n.contactExchanged;
+      return {
+        line: met ? "Hey! I don save your contact. How you dey?" : pickOne([
+          "Ah-ah, you no dey greet person again?",
+          "Omo, where you dey rush go?",
+          "Hi! How your day dey go?"
+        ]),
+        choices: [
+          { text: "🙂 I dey okay. How your own?", crushSay: "I dey okay. How your own?", crushReply: "E dey alright. This school wahala plenty sha.", crushEffect: "kind" },
+          { text: "😂 I dey find who go make me laugh", crushSay: "I dey find who go make me laugh.", crushReply: "Oya, you don find me. But no expect free comedy every day o!", crushEffect: "funny" },
+          { text: "😳 Hi, " + n.label, crushSay: "Hi, " + n.label + ".", crushReply: "Hi! You dey alright?", crushEffect: "shy" },
+          ...(met ? [] : [{ text: "📱 You go mind if we exchange contacts?", crushSay: "You go mind if we exchange contacts?", crushReply: "I no mind. We fit exchange contacts as friends.", crushEffect: "contact" }]),
+          { text: "👋 I go see you later", crushSay: "I go see you later.", crushReply: "No wahala. See you around!", afterChoices: [{ text: "Close conversation", closeNow: true }] }
+        ]
+      };
+    }
+    const sir = n.label.startsWith("Mr ") ? "sir" : "ma";
+    const inClass = PLAN[clock.period] === "class";
+    if (n.cool > 0) {
+      return { line: pickOne(["Eh, we just spoke. Go and do something.", "Again? Let me breathe small.", "I have said my own. Go on."]), choices: [{ text: "OK" }] };
+    }
+    if (n.owes > 0) {
+      return { line: "Oga! Remember the ₦50 you gave me? Here is ₦" + n.owes + ". Thank you!", choices: [{ text: "Collect ₦" + n.owes, gain: n.owes, repay: true, reply: "God bless you!" }] };
+    }
+    if (n.lateT > 0) return { line: pickOne(["I dey come, I dey come! Go and sit down.", "Class never start? Ah, I'm on my way!"]), choices: [{ text: "OK" }] };
+    if (n.inRoom) {                         // sitting in the classroom with you
+      if (n.kind === "teacher") return SCENARIOS[n.info.pool[0]](n);   // answer a question in class
+      if (assignmentReady()) return copyOffer();                      // the assignment-copying scene
+      return { line: pickOne(["Shhh! The teacher is looking.", "Not now, I'm taking notes!", "Psst... did you do the assignment?"]), choices: [{ text: "OK" }] };
+    }
+    if (inClass && n.mode === "class") {
+      return { line: n.kind === "student" ? "Sorry o, I'm late for class!" : "I am on my way to class. Move along.", choices: [{ text: "OK" }] };
+    }
+    if (inClass && n.kind === "student") {
+      return { line: "Shhh! Don't tell Mr Kasala I'm outside o. I go give you ₦100.", choices: [
+        { text: "Take ₦100", gain: 100, reply: "We dey together!" },
+        { text: "I will tell him", reply: "Ehn? You no fit do me like that!" }
+      ] };
+    }
+    if (inClass) {
+      const kasalaBribe = n.label === "Mr Kasala";
+      return { line: pickOne(n.info.scold), choices: [
+        { text: kasalaBribe ? "sir keep shut make I bribe you (-₦40)" : "Sorry, " + sir + " (-₦50)", gain: kasalaBribe ? -40 : -50, reply: kasalaBribe ? pickOne(["You wan bribe me? Oya, make I see the money.", "You think say I no get price? Pay and disappear!"]) : pickOne(["Hmm. Don't let me meet you here again.", "Next time it will be the cane."]) },
+        { text: "Yes, " + sir }
+      ] };
+    }
+    if (incident && n.kind === "student" && Math.random() < 0.6) return incidentGossip(n);
+    let i;
+    do { i = Math.floor(Math.random() * n.info.pool.length); } while (i === n.last && n.info.pool.length > 1);
+    n.last = i;
+    return SCENARIOS[n.info.pool[i]](n);
+  }
+
+  function openDialogue(n) {
+    dialogue = n;
+    n.talking = true;
+    keys.up = keys.down = keys.left = keys.right = false;
+    dlg.style.display = "block";
+    padEl.style.display = "none";
+    talkBtn.style.display = "none";
+    const sc = chooseScenario(n);
+    showLine(n.label, sc.line, sc.choices);
+  }
+
+  function closeDialogue() {
+    dialogue.talking = false;
+    dialogue.cool = 20;
+    dialogue = null;
+    dlg.style.display = "none";
+    padEl.style.display = "grid";
+  }
+
+  talkBtn.addEventListener("click", () => {
+    if (dubNear) dubJoin();
+    else if (nearNpc) openDialogue(nearNpc);
+    else if (nearDoor) enterRoom();
+  });
+
+  function updateInteract() {
+    syncSocial();
+    nearNpc = null;
+    if (!dialogue) {
+      let best = TALK_DISTANCE;
+      for (const n of npcs) {
+        if (!visibleHere(n)) continue;
+        const d = Math.hypot(n.x - pl.x, n.z - pl.z);
+        if (d < best) { best = d; nearNpc = n; }
+      }
+    }
+    nearDoor = false;
+    nearBall = !dialogue && scene === "outside" && clock.period === "Break" && Math.hypot(ball.x - pl.x, ball.z - pl.z) < 1.7;
+    nearSwing = !dialogue && scene === "outside" && !pl.onSwing && !pl.seated && Math.hypot(SWING.x - pl.x, (SWING.z + 0.65) - pl.z) < 1.8;
+    if (!dialogue && scene === "outside") {
+      const dDoor = Math.hypot(pl.x - DOOR_OUT.x, pl.z - DOOR_OUT.z);
+      nearDoor = dDoor < 1.6 && (!nearNpc || dDoor < 1.0);   // standing right at the door, the door wins
+      if (nearDoor) nearNpc = null;
+    }
+    dubNear = !!(dub && dub.phase === "copy" && !dub.joined && !dialogue && !lesson && !trip && scene === "class" && !pl.onSwing &&
+      Math.hypot(pl.x - dubDesk(dub.owner).x, pl.z - dubDesk(dub.owner).z) < 2.6);
+    const show = (nearNpc || nearDoor || dubNear) && !lesson ? "block" : "none";
+    if (talkBtn.style.display !== show) talkBtn.style.display = show;
+    const text = dubNear ? "Join the copying 📝" : nearNpc ? (nearNpc.kind === "vendor" ? "Buy food 🍲" : nearNpc.streetRole === "corn" ? "Buy corn 🌽" : nearNpc.streetRole === "hawker" ? "Buy water 💧" : "Talk to " + nearNpc.label)
+               : nearDoor ? "Enter classroom 🚪" : "";
+    if (talkBtn.textContent !== text) talkBtn.textContent = text;
+
+    // the green button: sit down / stand up
+    nearSeat = null;
+    if (scene === "class" && !pl.seated && !dialogue && !lesson) {
+      const f = nearestFreeSeat();
+      nearSeat = f ? f.id : null;
+    }
+    const actShow = !dialogue && !lesson && (nearBall || nearSwing || pl.onSwing || (scene === "class" && (pl.seated || nearSeat !== null))) ? "block" : "none";
+    if (actBtn.style.display !== actShow) actBtn.style.display = actShow;
+    const actText = nearBall ? "Kick football ⚽" : pl.onSwing ? "Get off swing" : nearSwing ? "Use swing 🎠" : pl.seated ? "Stand up 🪑" : "Sit down 🪑";
+    if (actBtn.textContent !== actText) actBtn.textContent = actText;
+
+    // the walking pad is hidden whenever you cannot walk
+    const padWanted = dialogue || lesson || pl.seated ? "none" : "grid";
+    if (padEl.style.display !== padWanted) padEl.style.display = padWanted;
+    const socialWanted = socialOk() ? "block" : "none";
+    if (socialBtn.style.display !== socialWanted) socialBtn.style.display = socialWanted;
+    updateHomeButton();
+  }
+
+  // ---------- 10. ENERGY ----------
+  let energy = 100;
+  const energyFill = document.getElementById("efill");
+  let shownEnergy = -1;
+
+  function addEnergy(d) {
+    const before = energy;
+    energy = Math.min(100, Math.max(0, energy + d));
+    const real = Math.round(energy - before);
+    if (real > 0) floaters.push({ text: "+" + real + " ⚡", color: "255,214,64", life: 1.6 });
+  }
+
+  function updateEnergy(dt) {
+    energy = Math.max(0, energy - dt * (0.15 + (pl.moving ? 0.25 : 0)) * (perkIs("stubborn") ? 0.7 : 1));   // Stubborn: 30% slower drain
+    if (pl.seated && !lesson) energy = Math.min(100, energy + dt * 1.0);   // resting at a desk
+    const pct = Math.round(energy);
+    if (pct !== shownEnergy) {
+      shownEnergy = pct;
+      energyFill.style.width = pct + "%";
+      energyFill.style.background = pct > 40 ? "#4caf50" : pct > 15 ? "#f5b800" : "#e53935";
+    }
+  }
+
+  // ---------- 11. THE ASSEMBLY SHOW ----------
+  // A scripted scene: a timeline of events that runs during the Assembly period.
+  let uiTime = 0;       // seconds since the game started (used for shaking)
+  let incident = null;  // set after the show: { culprit }
+  let show = null;      // the show currently playing, or null
+
+  const MURMURS = ["psst...", "hehe", "*whispers*", "see Mr Opon's shoe", "he he he"];
+  const OUCH = ["Ah!", "Ouch!", "Sorry sir!", "Mummy!", "Ah-ah!", "Ehh!"];
+  const REACT = ["😂", "🤭", "Ehen!", "Haba!", "Oya!", "Chai!"];
+  const POST_LINES = ["NAME got six strokes!", "Chai! Did you see that?", "The cane no be play.", "I almost laughed o!", "Principal Okafor is fierce!"];
+
+  function say(n, text, secs) { n.bubble = { text: text, life: secs }; }
+  function swapCanes(a, b) { const c = a.look.cane; a.look.cane = b.look.cane; b.look.cane = c; }
+  function crowd(s, k) { return shuffle(s.students.filter((n) => n !== s.culprit)).slice(0, k); }
+  const KASALA_SPOT = { x: 6.9, z: 1.8, face: -1.8 }; // beside the principal, facing him
+
+  const SCRIPT = [
+    { at: 8,    run: (s) => say(s.principal, "Good morning, students!", 3) },
+    { at: 9.5,  run: (s) => crowd(s, 3).forEach((n) => say(n, "Good morning, sir!", 2.5)) },
+    { at: 13,   run: (s) => say(s.principal, "Today: punctuality and discipline.", 4) },
+    { at: 19,   run: (s) => say(s.culprit, "hehe... psst", 3) },
+    { at: 22,   run: (s) => { say(s.principal, "WHO IS TALKING?!", 3); s.principal.lookAt = s.culprit; } },
+    { at: 25,   run: (s) => { say(s.principal, "YOU! Come out here!", 3); s.culprit.goal = { x: 5.6, z: 2.7, face: Math.PI }; } },
+    { at: 26.5, run: (s) => say(s.culprit, "Me, sir??", 2) },
+    { at: 29,   run: (s) => { say(s.principal, "Mr Kasala, your cane.", 3); s.kasala.goal = KASALA_SPOT; } },
+    { at: 34,   run: (s) => { swapCanes(s.kasala, s.principal); say(s.kasala, "Yes, sir.", 2); say(s.principal, "Hold out your hand.", 3); s.kasala.goal = null; } },
+    { at: 45,   run: (s) => { say(s.principal, "Next time it will be twelve!", 3.5); s.culprit.goal = null; s.principal.lookAt = null; } },
+    { at: 46,   run: (s) => say(s.culprit, "*rubbing hand*", 3) },
+    { at: 47,   run: (s) => { say(s.principal, "Mr Kasala, collect it.", 3); s.kasala.goal = KASALA_SPOT; } },
+    { at: 51,   run: (s) => { swapCanes(s.kasala, s.principal); s.kasala.goal = null; } },
+    { at: 52,   run: (s) => say(s.principal, "Dismissed! Go to your classes!", 4) }
+  ];
+  for (let k = 0; k < 6; k++) {            // six strokes, one per second
+    SCRIPT.push({ at: 37 + k, run: (s) => {
+      say(s.principal, "WHACK!", 0.9);
+      say(s.culprit, pickOne(OUCH), 0.9);
+      crowd(s, 2).forEach((n) => say(n, pickOne(REACT), 1.2));
+    } });
+  }
+  SCRIPT.sort((a, b) => a.at - b.at);
+
+  function startAssembly() {
+    const students = npcs.filter((n) => n.kind === "student" && !n.inside);
+    show = {
+      t: 0, next: 0, phase: "show", murmurAt: 17, postT: 0, gossipAt: 0,
+      students: students, culprit: pickOne(students.filter((n) => !n.specialCrush)),
+      principal: npcs.find((n) => n.info.principal),
+      kasala: npcs.find((n) => n.label === "Mr Kasala")
+    };
+    incident = null;
+  }
+
+  function endShow() {
+    for (const n of npcs) { n.goal = null; n.lookAt = null; n.shake = 0; n.armR = null; }
+    if (show.principal.look.cane) swapCanes(show.principal, show.kasala); // cane goes back to Mr Kasala
+    incident = { culprit: show.culprit };
+    show.phase = "post";
+    show.postT = 7;
+    show.gossipAt = 0.5;
+  }
+
+  function updateDirector(dt) {
+    uiTime += dt;
+    const inAssembly = clock.period === "Assembly";
+    if (inAssembly && !show) startAssembly();
+    if (!show) return;
+
+    if (show.phase === "show") {
+      show.t += dt;
+      while (show.next < SCRIPT.length && SCRIPT[show.next].at <= show.t) SCRIPT[show.next++].run(show);
+      if (show.t >= show.murmurAt && show.t < 50) {
+        if (show.t < 36 || show.t > 44) {   // pause the murmuring during the strokes
+          const talker = show.t > 21 ? crowd(show, 1)[0] : pickOne(show.students); // after he is caught, someone else murmurs
+          say(talker, pickOne(MURMURS), 2.2);
+        }
+        show.murmurAt = show.t + rand(1.5, 3);
+      }
+      const swinging = show.t >= 36.35 && show.t < 42.3;
+      let flinch = false;
+      if (swinging) {
+        const p = (show.t - 36.35) % 1;          // where we are in one stroke: 0 to 1
+        show.principal.armR = p < 0.5 ? -0.2 - 4.8 * p       // wind up: raise the arm
+                            : p < 0.65 ? -2.6 + 16 * (p - 0.5) // WHACK: bring it down fast
+                            : -0.2;                            // hold at the bottom
+        show.principal.sw = 0;                                 // feet stay still
+        flinch = p > 0.62 && p < 0.9;
+      } else {
+        show.principal.armR = null;
+      }
+      show.culprit.armR = (show.t >= 34 && show.t < 45) ? -1.4 : null; // holding out a hand
+      show.culprit.shake = flinch ? 0.06 : 0;
+      if (!inAssembly) endShow();
+    } else {
+      show.postT -= dt;
+      show.gossipAt -= dt;
+      if (show.gossipAt <= 0) {
+        say(crowd(show, 1)[0], pickOne(POST_LINES).replace("NAME", show.culprit.label), 2.5);
+        show.gossipAt = rand(0.8, 1.4);
+      }
+      if (show.postT <= 0) show = null;
+    }
+  }
+
+  // ---------- 12. CAMERA ----------
+  let camYaw = 0;       // turning the camera around you
+  let camHeight = 9;    // how high it floats
+  let camZoom = 1.5;    // 1 = original view; higher = closer. We start a little zoomed in.
+  const hintEl = document.getElementById("hint");
+  let hintTimer = null;
+  function flashHint(text, ms) {
+    hintEl.textContent = text;
+    hintEl.style.opacity = "1";
+    clearTimeout(hintTimer);
+    hintTimer = setTimeout(() => { hintEl.style.opacity = "0"; }, ms || 4500);
+  }
+  flashHint("Drag to look around · pinch or +/− to zoom", 8000);
+
+  const pointers = new Map(); // every finger touching the screen
+  let pinch = null;           // set while two fingers are down
+
+  cv.addEventListener("pointerdown", (e) => {
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    try { cv.setPointerCapture(e.pointerId); } catch (err) { /* fine */ }
+    hintEl.style.opacity = "0";
+    if (pointers.size === 2) {
+      const [a, b] = [...pointers.values()];
+      pinch = { dist: Math.hypot(a.x - b.x, a.y - b.y), zoom: camZoom };
+    }
+  });
+  cv.addEventListener("pointermove", (e) => {
+    const p = pointers.get(e.pointerId);
+    if (!p) return;
+    if (pointers.size === 1) {                       // one finger: look around
+      camYaw -= (e.clientX - p.x) * 0.008;
+      camHeight = Math.min(16, Math.max(5, camHeight + (e.clientY - p.y) * 0.03));
+    }
+    p.x = e.clientX;
+    p.y = e.clientY;
+    if (pointers.size === 2 && pinch) {              // two fingers: zoom
+      const [a, b] = [...pointers.values()];
+      const d = Math.hypot(a.x - b.x, a.y - b.y);
+      camZoom = Math.min(3, Math.max(0.8, pinch.zoom * d / pinch.dist));
+    }
+  });
+  const letGo = (e) => { pointers.delete(e.pointerId); pinch = null; };
+  ["pointerup", "pointercancel"].forEach((ev) => cv.addEventListener(ev, letGo));
+  document.getElementById("zin").addEventListener("click", () => { camZoom = Math.min(3, camZoom * 1.2); });
+  document.getElementById("zout").addEventListener("click", () => { camZoom = Math.max(0.8, camZoom / 1.2); });
+
+  // ---------- 13. THE CLASSROOM ----------
+  let scene = "outside";   // "outside" or "class": which place the player is in
+  let nearDoor = false;
+  let nearSwing = false;
+  const DOOR_OUT = { x: 0, z: -3.4 };   // just outside the classroom door
+
+  const room = [];        // solid pieces of the classroom
+  const roomWalls = [];   // rectangles you cannot walk through
+  const roomTiles = [];   // the floor
+  // rbox works like box(): y is the height above the floor.
+  // cut = [nx, nz, limit]: hide this piece when the camera is beyond that wall, so we can always see in.
+  function rbox(x, y, z, hx, hy, hz, c, cut) { room.push({ p: [x, 0.5 + y, z], h: [hx, hy, hz], r: 0, c: c, cut: cut }); }
+
+  const CREAM = [245, 235, 200], WOOD = [150, 100, 55], DARKWOOD = [110, 75, 40];
+  for (let i = -5; i < 5; i++)
+    for (let j = -5; j < 5; j++)
+      roomTiles.push({ i: i, j: j, c: (i + j) % 2 === 0 ? [196, 164, 120] : [186, 154, 110] });
+
+  for (let x = -4; x <= 4; x += 2) rbox(x, 1.5, -5.1, 1, 1.5, 0.1, CREAM, [0, -1, 5]);          // back wall
+  for (const x of [-4, -2, 2, 4]) rbox(x, 1.5, 5.1, 1, 1.5, 0.1, CREAM, [0, 1, 5]);              // front wall, door gap in the middle
+  rbox(0, 2.6, 5.1, 1, 0.4, 0.1, CREAM, [0, 1, 5]);                                              // above the door
+  rbox(-1, 1.1, 5.1, 0.08, 1.1, 0.12, DARKWOOD, [0, 1, 5]);                                      // door frame
+  rbox(1, 1.1, 5.1, 0.08, 1.1, 0.12, DARKWOOD, [0, 1, 5]);
+  for (const z of [-4, -2, 0, 2, 4]) {                                                                  // side walls
+    rbox(-5.1, 1.5, z, 0.1, 1.5, 1, CREAM, [-1, 0, 5]);
+    rbox(5.1, 1.5, z, 0.1, 1.5, 1, CREAM, [1, 0, 5]);
+  }
+  rbox(0, 1.6, -4.95, 2.2, 0.6, 0.03, [25, 60, 45], [0, -1, 5]);                                 // blackboard
+  rbox(-0.9, 1.95, -4.9, 0.7, 0.02, 0.01, [235, 235, 235], [0, -1, 5]);                          // chalk writing
+  rbox(-0.6, 1.65, -4.9, 1.0, 0.02, 0.01, [235, 235, 235], [0, -1, 5]);
+  rbox(-1.0, 1.35, -4.9, 0.5, 0.02, 0.01, [235, 235, 235], [0, -1, 5]);
+  rbox(0, 0.45, -3.8, 0.9, 0.45, 0.4, WOOD);                                                     // teacher's desk
+  rbox(-0.4, 0.94, -3.8, 0.2, 0.04, 0.15, [200, 50, 50]);                                        // a book on it
+  roomWalls.push({ x0: -0.9, x1: 0.9, z0: -4.2, z1: -3.4 });
+  roomWalls.push({ x0: -5.2, x1: -1.0, z0: 5.0, z1: 5.2 });
+  roomWalls.push({ x0: 1.0, x1: 5.2, z0: 5.0, z1: 5.2 });
+
+  const DESK_X = [-3.9, -1.3, 1.3, 3.9], DESK_Z = [-1.8, 0.0, 1.8];
+  for (const dz of DESK_Z) {
+    for (const dx of DESK_X) {
+      rbox(dx, 0.75, dz, 0.55, 0.05, 0.4, WOOD);                    // desk top
+      rbox(dx, 0.37, dz, 0.5, 0.37, 0.3, DARKWOOD);                 // desk body
+      rbox(dx, 0.3, dz + 0.75, 0.3, 0.3, 0.25, [60, 110, 190]);     // chair
+      roomWalls.push({ x0: dx - 0.55, x1: dx + 0.55, z0: dz - 0.4, z1: dz + 0.35 });
+    }
+  }
+
+  function freeRoom(x, z) {
+    if (x < -4.7 || x > 4.7 || z < -4.7 || z > 5.4) return false;
+    for (const w of roomWalls) {
+      if (x > w.x0 - RADIUS && x < w.x1 + RADIUS && z > w.z0 - RADIUS && z < w.z1 + RADIUS) return false;
+    }
+    return true;
+  }
+
+  const visibleHere = (n) => scene === "outside" ? !n.inside : !!n.inRoom;
+
+  const CLASS_TEACHER = { "Class 1": "Mr Opon", "Class 2": "Mrs Shukudi", "Class 3": "Mrs Bamidele", "Class 4": "Mr Opon" };
+  const LECTURE = {
+    "Mr Opon": ["Open your books to page 42.", "x plus x is 2x. Who sees it?", "Silence! Maths needs concentration."],
+    "Mrs Shukudi": ["Today we study the noun.", "Spell 'necessary' for me.", "Who can use 'whom' correctly?"],
+    "Mrs Bamidele": ["Wash your hands before cooking!", "Today: how to make stew.", "Protein builds the body."]
+  };
+
+  function seatFor(n) {
+    if (n.kind === "student") {
+      return { x: DESK_X[n.slot % 4], z: DESK_Z[Math.floor(n.slot / 4) % 3] + 0.75, face: Math.PI, seated: true };
+    }
+    return { x: 0, z: -1.2, face: 0, seated: false };   // the teacher stands at the front, facing the class
+  }
+
+  // who is in the room right now: students and teachers who walked in for class
+  let lateKey = "", lateLeft = 0;      // Class 2 and 4: the next teacher can be late too (seconds left)
+  function syncRoom() {
+    for (const n of npcs) {
+      const inClass = n.inside && n.hideAt === "door" && n.mode === "class";
+      const wanted = n.kind === "student" ? inClass : inClass && n.label === CLASS_TEACHER[clock.period] && lateLeft <= 0;
+      if (wanted && !n.inRoom) {
+        const sp = seatFor(n);
+        n.x = sp.x; n.z = sp.z; n.face = sp.face; n.seated = sp.seated; n.inRoom = true;
+      } else if (!wanted && n.inRoom) {
+        n.inRoom = false;
+        n.seated = false;
+      }
+    }
+  }
+
+  let roomTimer = 0;
+  function updateRoom(dt) {
+    if (scene !== "class") return;
+    if (pl.z > 4.9 && Math.abs(pl.x) < 1) { leaveRoom(); return; }   // walked out through the door
+    if (lateKey !== doneKey()) { lateKey = doneKey(); lateLeft = ((clock.period === "Class 2" || clock.period === "Class 4") && Math.random() < 0.6) ? rand(18, 30) : 0; }
+    syncRoom();
+    if (pl.seated && !lesson && seatTaken(pl.seatId)) { standUp(); flashHint("That seat belongs to someone else!", 3000); }
+    if (pl.seated && !lesson && !done[doneKey()]) {
+      const t0 = npcs.find((n) => n.inRoom && n.kind === "teacher");
+      if (t0) startLesson(t0);                          // sat down in class: the quiz begins
+    }
+    roomTimer -= dt;
+    if (roomTimer > 0) return;
+    roomTimer = rand(4, 7);
+    const teacher = npcs.find((n) => n.inRoom && n.kind === "teacher");
+    const kids = npcs.filter((n) => n.inRoom && n.kind === "student");
+    if (teacher && LECTURE[teacher.label] && Math.random() < 0.6) say(teacher, pickOne(LECTURE[teacher.label]), 3.5);
+    else if (teacher && kids.length) say(pickOne(kids), pickOne(["Yes ma!", "Yes sir!", "🤭", "...", "Ehen?"]), 2);
+  }
+
+// ---------- 14. ATTENDING CLASS ----------
+  const actBtn = document.getElementById("act");
+  let nearSeat = null;
+  let lesson = null;                 // the quiz in progress, or null
+  const done = {};                   // lessons already taken: "day|period" -> true
+  const doneKey = () => clock.day + "|" + clock.period;
+  const QUESTION_TIME = 12;
+  // "Life as..." perks live inside the saved profile (profile.perk). No perk saved = no bonus.
+  const perkIs = (name) => !!profile && profile.perk === name;
+  const questionTime = () => Math.max(6, QUESTION_TIME + (perkIs("brilliant") ? 4 : 0) - levelOf().timeCut);   // Brilliant: 4 extra seconds; exam week: 2 fewer
+  const questionCount = () => levelOf().q;                                    // Level 1: 3, Level 2: 4, Level 3: 5
+  const quizReward = () => 40 + (perkIs("brilliant") ? 10 : 0) + levelOf().pay;               // Brilliant: ₦50 per right answer
+  const SUBJECT_QUIZ = { "Mr Opon": ["mathsQuiz"], "Mrs Shukudi": ["englishQuiz"], "Mrs Bamidele": ["homeEcQuiz"] };
+  let lessonsTotal = 0;
+  try { lessonsTotal = Number(localStorage.getItem("naijaHighLessons")) || 0; } catch (e) { lessonsTotal = 0; }
+
+  // seats 0-7: id = row * 4 + column. Students use the same numbering through their slot.
+  const AISLES = [-2.6, 0, 2.6];
+  const seatId = (n) => (Math.floor(n.slot / 4) % 3) * 4 + (n.slot % 4);
+  const seatPos = (id) => ({ x: DESK_X[id % 4], z: DESK_Z[Math.floor(id / 4)] + 0.75 });
+  // a seat is "taken" if a student who is attending class owns it (even if still walking in)
+  function seatTaken(id) { return npcs.some((n) => n.kind === "student" && n.mode === "class" && seatId(n) === id); }
+  function nearestFreeSeat() {
+    let best = null;
+    for (let id = 0; id < 12; id++) {
+      if (seatTaken(id)) continue;
+      const p = seatPos(id);
+      const d = Math.hypot(p.x - pl.x, p.z - pl.z);
+      if (d < 1.6 && (!best || d < best.d)) best = { id: id, d: d };
+    }
+    return best;
+  }
+  function sit(id) {
+    const p = seatPos(id);
+    pl.x = p.x; pl.z = p.z; pl.face = Math.PI; pl.seated = true; pl.seatId = id;
+    if (!npcs.some((n) => n.inRoom && n.kind === "teacher")) flashHint("You sit and rest. Your energy comes back slowly.", 3500);
+  }
+  function standUp() {
+    const p = seatPos(pl.seatId);
+    let aisle = AISLES[0];
+    for (const a of AISLES) if (Math.abs(a - p.x) < Math.abs(aisle - p.x)) aisle = a;
+    pl.x = aisle; pl.z = p.z; pl.seated = false; pl.yOffset = 0; pl.onSwing = false;   // step out into the nearest aisle
+  }
+  actBtn.addEventListener("click", () => {
+    if (nearBall) {
+      let dx = ball.x - pl.x, dz = ball.z - pl.z;               // kick the ball AWAY from you
+      const dd = Math.hypot(dx, dz);
+      if (dd < 0.05) { dx = Math.sin(pl.face); dz = Math.cos(pl.face); } else { dx /= dd; dz /= dd; }
+      pl.face = Math.atan2(dx, dz);                              // turn to look where the ball goes
+      ball.vx = dx * 9; ball.vz = dz * 9; nearBall = false;
+      flashHint("You kick the ball! Run after it and kick again. ⚽", 2200);
+    } else if (pl.onSwing) {
+      pl.onSwing = false; pl.seated = false; pl.yOffset = 0;
+      pl.x = SWING.x; pl.z = SWING.z + 1.0;
+      flashHint("You hop off the swing.", 1600);
+    } else if (nearSwing) {
+      pl.x = SWING.x; pl.z = SWING.z; pl.face = Math.PI;
+      pl.seated = true; pl.onSwing = true; pl.yOffset = (SWING_PIVOT_Y - SWING_LENGTH) - 0.5;
+      flashHint("You're on the swing! Tap 'Get off swing' when you're done.", 2500);
+    } else if (pl.seated) standUp();
+    else if (nearSeat !== null) sit(nearSeat);
+  });
+
+  // the question panel (re-uses the dialogue box)
+  function panel(name, text, buttons) {
+    dlg.style.display = "block";
+    document.getElementById("dname").textContent = name;
+    document.getElementById("dtext").textContent = text;
+    const box = document.getElementById("dchoices");
+    box.textContent = "";
+    for (const b of buttons) {
+      const el = document.createElement("button");
+      el.textContent = b.text;
+      el.addEventListener("click", b.run);
+      box.appendChild(el);
+    }
+  }
+  function hidePanel() { dlg.style.display = "none"; }
+
+  function startLesson(teacher) {
+    lesson = { teacher: teacher, phase: "intro", t: 2, n: 0, correct: 0, q: null, shown: -1, seen: [] };
+    done[doneKey()] = true;
+    say(teacher, "Pop quiz! Books closed!", 2.5);
+    panel(teacher.label, "Settle down... pop quiz!", []);
+  }
+  function header() {
+    return lesson.teacher.label + " · Question " + (lesson.n + 1) + "/" + questionCount() + " · ⏱ " + Math.max(Math.ceil(lesson.t), 0) + "s";
+  }
+  function makeQuestion() {
+    let sc;
+    for (let k = 0; k < 8; k++) {                       // try not to repeat a question
+      sc = SCENARIOS[pickOne(SUBJECT_QUIZ[lesson.teacher.label])]();
+      if (!lesson.seen.includes(sc.line)) break;
+    }
+    lesson.seen.push(sc.line);
+    return { line: sc.line, options: sc.choices.map((c) => c.text), correct: sc.choices.findIndex((c) => c.gain) };
+  }
+  function nearestMate() {
+    let best = null, bd = 1e9;
+    for (const n of npcs) {
+      if (!n.inRoom || n.kind !== "student") continue;
+      const d = Math.hypot(n.x - pl.x, n.z - pl.z);
+      if (d < bd) { bd = d; best = n; }
+    }
+    return best;
+  }
+  function nextQuestion() {
+    lesson.q = makeQuestion();
+    lesson.phase = "ask";
+    lesson.t = questionTime();
+    lesson.shown = Math.ceil(lesson.t);
+    panel(header(), lesson.q.line, lesson.q.options.map((text, i) => ({ text: text, run: () => answer(i) })));
+    const mate = nearestMate();                          // a classmate whispers an answer... which may be wrong
+    if (mate && Math.random() < 0.7) {
+      const guess = Math.random() < 0.6 ? lesson.q.correct : int(0, lesson.q.options.length - 1);
+      say(mate, 'psst... "' + lesson.q.options[guess] + '"', 5);
+    }
+  }
+  function answer(i) {                                   // i = -1 means time ran out
+    if (!lesson || lesson.phase !== "ask") return;
+    const q = lesson.q, ok = i === q.correct;
+    if (ok) { lesson.correct++; addMoney(quizReward()); }
+    say(lesson.teacher, ok ? "Correct!" : i < 0 ? "Time up!" : "No. It is " + q.options[q.correct] + ".", 2);
+    for (const n of shuffle(npcs.filter((m) => m.inRoom && m.kind === "student")).slice(0, 2)) {
+      say(n, pickOne(ok ? ["Ehen!", "👏"] : ["😂", "Chai!"]), 1.5);
+    }
+    lesson.phase = "result";
+    lesson.t = 1.6;
+    panel(lesson.teacher.label, ok ? "Correct! +₦" + quizReward() : (i < 0 ? "Time up! " : "Wrong. ") + "The answer was " + q.options[q.correct] + ".", []);
+  }
+  function finishLesson(abortMsg) {
+    const c = lesson.correct;
+    const bonus = !abortMsg && c === questionCount() ? 60 : 0;
+    if (bonus) addMoney(bonus);
+    energy = Math.max(0, energy - (perkIs("stubborn") ? 5 : 8));   // Stubborn: lessons tire you less
+    lessonsTotal++;
+    try { localStorage.setItem("naijaHighLessons", String(lessonsTotal)); } catch (e) { /* saving is optional */ }
+    const t = lesson.teacher;
+    say(t, c === questionCount() ? "Excellent! Full marks!" : c >= 2 ? "Fair. Study more." : "Hmm. See me after class.", 3);
+    lesson.phase = "report";
+    panel(t.label, (abortMsg ? abortMsg + " " : "Quiz over. ") + c + "/" + questionCount() + " correct." +
+      (bonus ? " Full marks bonus +₦" + bonus + "!" : "") + " Lessons attended: " + lessonsTotal + ".",
+      [{ text: "OK", run: () => { lesson = null; hidePanel(); } }]);
+  }
+  function updateLesson(dt) {
+    if (!lesson || lesson.phase === "report") return;
+    if (!lesson.teacher.inRoom || scene !== "class") {   // the bell rang, or the teacher left
+      if (lesson.n === 0 && lesson.phase === "intro") { lesson = null; hidePanel(); }
+      else finishLesson("Bell! Class is over.");
+      return;
+    }
+    lesson.t -= dt;
+    if (lesson.phase === "intro") {
+      if (lesson.t <= 0) nextQuestion();
+    } else if (lesson.phase === "ask") {
+      const secs = Math.ceil(lesson.t);
+      if (secs !== lesson.shown) { lesson.shown = secs; document.getElementById("dname").textContent = header(); }
+      if (lesson.t <= 0) answer(-1);
+    } else if (lesson.phase === "result" && lesson.t <= 0) {
+      lesson.n++;
+      if (lesson.n >= questionCount()) finishLesson(); else nextQuestion();
+    }
+  }
+
+  function enterRoom() {
+    scene = "class";
+    pl.x = 0; pl.z = 2.3; pl.face = Math.PI;
+    syncRoom();
+    const teacher = npcs.find((n) => n.inRoom && n.kind === "teacher");
+    if (teacher) { say(teacher, "You are late! Sit down quietly.", 3.5); flashHint(clock.period + " · " + teacher.label + " is teaching. Sit at a free desk to join in, or walk out the door to leave.", 5500); }
+    else if (npcs.some((n) => n.inRoom && n.kind === "student")) flashHint("The teacher is late! Watch what the students are doing... 👀", 5000);
+    else flashHint("The classroom is empty right now. Walk out the door to leave.", 5000);
+    roomTimer = 4;
+  }
+  function leaveRoom() {
+    scene = "outside";
+    pl.x = 0; pl.z = -3.2; pl.face = 0;
+  }
+
+  // ---------- 7. DRAWING ----------
+  // writes a name on a fence board; the text is tilted to match the board (a flat "affine" fit of the perspective)
+  function drawSign(s, project, cam) {
+    if (dot(s.N, sub(cam, s.p)) <= 0) return;                  // we are behind the board
+    const c = project(s.p), pa = project(add(s.p, s.A)), pu = project(add(s.p, [0, 1, 0]));
+    if (c[2] < 0.1 || pa[2] < 0.1 || pu[2] < 0.1 || c[0] < -150 || c[0] > W + 150 || c[1] < -80 || c[1] > H + 80) return;
+    const S = 40;                                              // text is drawn at 40 units per world block
+    const ax = pa[0] - c[0], ay = pa[1] - c[1];
+    if (Math.hypot(ax, ay) < 4) return;                        // too far away to read
+    g.save();
+    g.transform(ax / S, ay / S, -(pu[0] - c[0]) / S, -(pu[1] - c[1]) / S, c[0], c[1]);
+    g.font = "700 17px sans-serif";
+    const w = g.measureText(s.text).width;
+    if (w > 66) g.font = "700 " + Math.max(7, Math.floor(17 * 66 / w)) + "px sans-serif";
+    g.textAlign = "center"; g.textBaseline = "middle";
+    g.fillStyle = s.ink;
+    g.fillText(s.text, 0, 0);
+    g.restore();
+  }
+  function drawQuad(pts, color) {
+    g.fillStyle = color;
+    g.beginPath();
+    g.moveTo(pts[0][0], pts[0][1]);
+    for (let i = 1; i < 4; i++) g.lineTo(pts[i][0], pts[i][1]);
+    g.closePath();
+    g.fill();
+    g.stroke();
+  }
+
+  const TAG_RADIUS = 3.5; // an NPC's name shows only when you are this close...
+  const TAG_FADE = 1.2;   // ...fading in over the last 1.2 blocks
+  const TAG_MAX = 3;      // and never more than this many NPC names at once
+  function drawNameTags(project) {
+    g.font = "600 13px sans-serif";
+    g.textAlign = "center";
+    g.textBaseline = "middle";
+    const shown = npcs
+      .filter(visibleHere)
+      .map((n) => ({ ch: n, d: Math.hypot(n.x - pl.x, n.z - pl.z) }))
+      .filter((e) => e.d <= TAG_RADIUS)
+      .sort((a, b) => a.d - b.d)
+      .slice(0, TAG_MAX);
+    shown.push({ ch: pl, d: 0 });        // your own "You" tag is always there
+    for (const e of shown) {
+      const ch = e.ch;
+      const q = project([ch.x, 2.75, ch.z]);
+      if (q[2] < 0.1) continue;
+      g.globalAlpha = ch === pl ? 1 : Math.min(1, (TAG_RADIUS - e.d) / TAG_FADE);
+      const labelText = ch.label;
+      const extra = ch.tagLabel || "";
+      const w = Math.max(g.measureText(labelText).width, extra ? g.measureText(extra).width : 0) + 14;
+      g.fillStyle = "rgba(0,0,0,0.65)";
+      g.beginPath();
+      if (g.roundRect) g.roundRect(q[0] - w / 2, q[1] - (extra ? 22 : 11), w, extra ? 38 : 22, 9);
+      else g.rect(q[0] - w / 2, q[1] - (extra ? 22 : 11), w, extra ? 38 : 22);
+      g.fill();
+      g.fillStyle = "rgb(" + ch.tag.join(",") + ")";
+      g.fillText(labelText, q[0], q[1] + (extra ? -8 : 1));
+      if (extra) { g.fillStyle = "#ff9ed2"; g.font = "700 10px sans-serif"; g.fillText(extra, q[0], q[1] + 7); g.font = "600 13px sans-serif"; }
+    }
+    g.globalAlpha = 1;
+  }
+
+  function drawBubbles(project, dt) {
+    g.font = "600 13px sans-serif";
+    g.textAlign = "center";
+    g.textBaseline = "middle";
+    for (const ch of [pl].concat(npcs, traffic)) {
+      if (!ch.bubble) continue;
+      ch.bubble.life -= dt;
+      if (ch.bubble.life <= 0) { ch.bubble = null; continue; }
+      if (ch !== pl && !visibleHere(ch)) continue;
+      const q = project([ch.x, 3.5, ch.z]);
+      if (q[2] < 0.1 || q[0] < -80 || q[0] > W + 80 || q[1] < -30 || q[1] > H + 30) continue;
+      const w = g.measureText(ch.bubble.text).width + 18;
+      const cx = Math.min(Math.max(q[0], w / 2 + 6), W - w / 2 - 6);
+      g.globalAlpha = Math.min(1, ch.bubble.life / 0.4);
+      g.fillStyle = "rgba(255,255,255,0.95)";
+      g.beginPath();
+      if (g.roundRect) g.roundRect(cx - w / 2, q[1] - 12, w, 24, 12);
+      else g.rect(cx - w / 2, q[1] - 12, w, 24);
+      g.fill();
+      g.fillStyle = "#102030";
+      g.fillText(ch.bubble.text, cx, q[1] + 1);
+    }
+    g.globalAlpha = 1;
+  }
+
+  function drawFloaters(project, dt) {
+    g.font = "700 18px sans-serif";
+    g.textAlign = "center";
+    g.textBaseline = "middle";
+    g.lineWidth = 3;
+    g.strokeStyle = "rgba(0,0,0,0.6)";
+    for (const f of floaters) {
+      f.life -= dt;
+      if (f.life <= 0) continue;
+      const q = project([pl.x, 3.3 + (1.6 - f.life) * 0.8, pl.z]);
+      g.globalAlpha = Math.min(1, f.life / 0.6);
+      g.fillStyle = "rgb(" + f.color + ")";
+      g.strokeText(f.text, q[0], q[1]);
+      g.fillText(f.text, q[0], q[1]);
+    }
+    g.globalAlpha = 1;
+    g.lineWidth = 1;
+    floaters = floaters.filter((f) => f.life > 0);
+  }
+
+  // ---------- GOING HOME (after the closing bell) ----------
+  // Three ways home: trek (free, tiring), wait for a parent's car (free), or an okada (costs money).
+  const homeBtn = document.getElementById("homeBtn"), fadeEl = document.getElementById("fade"), fadeText = document.getElementById("fadeText");
+  const homeActor = { label: "Going home", talking: true, cool: 0, owes: 0 };   // a pretend "person" so the dialogue box can be used
+  let trip = null;            // the journey in progress: { mode, t, total, lines, shown, day }, or null
+  let pickup = null;          // the parent's car on the street, or null
+  let pickupDelay = 0;        // seconds until the parent's car appears
+  let homeParent = "Mummy";
+  let homeNearCar = false;
+  let lastPeriod = "";
+  const TRIP_MIDDLE = ["☀️ The sun is hot. A keke honks at you.", "🌽 You pass roasted corn. Your belly grumbles.", "👴 You greet an old man by the road. He smiles.", "🐐 A goat looks at you like you owe it money.", "🧃 Pure water seller shouts after you."];
+  function tripLines(mode) {
+    if (mode === "trek") return ["🚶 You step out of the gate and start to trek...", ...shuffle(TRIP_MIDDLE.slice()).slice(0, 2), "🏠 You turn into your street. Almost home..."];
+    if (mode === "parent") return ["🚗 You jump into the back seat.", "📻 " + homeParent + " is playing gospel music.", "🏠 The car stops at your gate. You are home!"];
+    return ["🛵 You hold the okada rider tight.", "💨 Wind for face! Everybody is staring.", "🏠 Zoom! You reach your gate."];
+  }
+  function homeDialog(name, text, choices) {
+    dialogue = homeActor; homeActor.talking = true;
+    keys.up = keys.down = keys.left = keys.right = false;
+    dlg.style.display = "block"; padEl.style.display = "none"; talkBtn.style.display = "none";
+    showLine(name, text, choices);
+  }
+  function openHomeChoices() {
+    homeDialog("🏠 School is over", "The closing bell has rung. How will you go home?", [
+      { text: "🚶 Trek home (free, uses energy)", homeAction: "trek" },
+      { text: "🚗 Wait for my parent to pick me up (free)", homeAction: "parent" },
+      { text: "🛵 Take an okada (₦60)", homeAction: "okada" },
+      { text: "Not yet, I wan stay small", homeAction: "stay" }
+    ]);
+  }
+  function cancelPickup() {
+    pickupDelay = 0;
+    if (pickup) { const k = traffic.indexOf(pickup); if (k >= 0) traffic.splice(k, 1); pickup = null; }
+  }
+  function spawnPickup() {
+    const lane = LANES[1];                                // the lane in front of the gate, driving left
+    const v = { type: "car", lane: lane, dir: -1, x: 17, z: lane.z, face: -Math.PI / 2, speed: 4.5, cur: 4.5, len: VEH.car.len, wid: VEH.car.wid,
+      reckless: false, parts: VEH.car.build(pickOne(VCOLOURS.car), { shirt: pickOne(SHIRTS), skin: pickOne(SKINS) }), bubble: null, honkCd: 0, shoutCd: 99,
+      parent: true, stopX: 0, parked: false, announced: false, cryCd: 1.5 };
+    traffic.push(v); pickup = v;
+  }
+  function startTrip(mode) {
+    if (pickup) { pickup.parent = false; pickup = null; }    // the car just drives on
+    pickupDelay = 0;
+    keys.up = keys.down = keys.left = keys.right = false;
+    trip = { mode: mode, t: 0, total: mode === "trek" ? 6 : 4, lines: tripLines(mode), shown: -1, day: clock.day };
+    fadeEl.style.display = "flex";
+  }
+  function arriveHome() {
+    const t = trip; trip = null;
+    fadeEl.style.display = "none";
+    if (t.mode === "trek") energy = Math.max(0, energy - Math.round(12 * (perkIs("stubborn") ? 0.7 : 1)));   // Stubborn: the trek tires you less
+    homeSummary = t;
+    const lv = levelOf();
+    const intro = t.mode === "trek" ? "You trekked home. Your legs are tired but you made it." : t.mode === "parent" ? homeParent + " gave you cold zobo on the way." : "The okada zoomed you home.";
+    const lvl = t.day === lv.day ? " 🎉 " + lv.name + " complete!" + (LEVELS[lv.id + 1] ? " Open 🔄 to try the next level, or sleep to keep going." : " You finished the last level!") : "";
+    homeDialog("🏠 Home sweet home", intro + " Day " + t.day + " is done. 💰 ₦" + money + " · 📚 Lessons " + lessonsTotal + "." + lvl,
+      [{ text: "😴 Sleep, then start the next day", homeAction: "sleep" }]);
+  }
+  let homeSummary = null;
+  function nextDay() {
+    const day = (homeSummary ? homeSummary.day : clock.day) + 1;   // an exact number, so a day rolling over during the trip cannot skip one
+    resetScenes();
+    clock.day = day; clock.min = DAY_START; clock.period = "";
+    energy = Math.min(100, energy + 60);                     // you ate and slept
+    flashHint("☀️ Day " + day + " begins. Go and shine!", 5000);
+  }
+  function handleHome(c) {
+    const a = c.homeAction;
+    if (a === "stay") { closeDialogue(); return; }
+    if (a === "trek") { closeDialogue(); startTrip("trek"); return; }
+    if (a === "okada") {
+      if (money < 60) { homeDialog("Okada Rider", "Oga, your money no reach ₦60. Try another way.", [{ text: "Back", homeAction: "back" }]); return; }
+      addMoney(-60); closeDialogue(); startTrip("okada"); return;
+    }
+    if (a === "back") { openHomeChoices(); return; }
+    if (a === "parent") {
+      closeDialogue();
+      homeParent = pickOne(["Mummy", "Daddy"]);
+      pickupDelay = 6;
+      flashHint("📞 You call " + homeParent + ". Wait near the gate, the car is coming.", 5000);
+      return;
+    }
+    if (a === "sleep") nextDay();
+  }
+  function updateHomeButton() {
+    homeNearCar = !!(pickup && pickup.parked && scene === "outside" && Math.hypot(pl.x - pickup.x, pl.z - pickup.z) < 3.4);
+    const want = !dialogue && !lesson && !trip && !dead && !menuOpen && clock.period === "Closing";
+    const show = want ? "block" : "none";
+    if (homeBtn.style.display !== show) homeBtn.style.display = show;
+    const text = homeNearCar ? "🚗 Get in the car" : "🏠 Go home";
+    if (homeBtn.textContent !== text) homeBtn.textContent = text;
+  }
+  homeBtn.addEventListener("click", () => {
+    if (dialogue || lesson || trip || dead) return;
+    if (homeNearCar) { startTrip("parent"); return; }
+    if (pickup || pickupDelay > 0) { flashHint(homeParent + " is coming. Wait on the road in front of the gate.", 3500); return; }
+    if (pl.onSwing) { pl.onSwing = false; pl.seated = false; pl.yOffset = 0; pl.x = SWING.x; pl.z = SWING.z + 1.0; }
+    else if (pl.seated) standUp();
+    if (scene === "class") leaveRoom();
+    openHomeChoices();
+  });
+  function updateHome(dt) {
+    if (clock.period !== lastPeriod) {
+      lastPeriod = clock.period;
+      if (lastPeriod === "Closing" && !trip) flashHint("🔔 School is over! Tap 🏠 Go home when you are ready.", 6500);
+      if (lastPeriod !== "Closing") cancelPickup();           // the parent drives off when the day ends
+    }
+    if (pickupDelay > 0) { pickupDelay -= dt; if (pickupDelay <= 0) spawnPickup(); }
+    if (pickup && pickup.parked && !pickup.announced) { pickup.announced = true; flashHint("🚗 " + homeParent + " has arrived! Walk to the car and tap Get in.", 5000); }
+    if (!trip) return;
+    trip.t += dt;
+    const idx = Math.min(trip.lines.length - 1, Math.floor(trip.t / trip.total * trip.lines.length));
+    if (idx !== trip.shown) { trip.shown = idx; fadeText.textContent = trip.lines[idx]; }
+    if (trip.t >= trip.total) arriveHome();
+  }
+  // wipe anything half-finished (used by a new level/start and by the next morning)
+  function resetScenes() {
+    if (dub) endDub(false);
+    if (dialogue) closeDialogue();
+    lesson = null; hidePanel(); copying = null;
+    trip = null; fadeEl.style.display = "none";
+    cancelPickup();
+    pl.onSwing = false; pl.seated = false; pl.yOffset = 0;
+    scene = "outside"; pl.x = 0; pl.z = 9.5; pl.face = 0;
+  }
+
+  // ---------- DUBBING: the teacher is late, so students gather round the desk of the one who did the assignment ----------
+  const dubActor = { label: "Dubbing", talking: true, cool: 0, owes: 0 };
+  let dub = null;             // the scene in progress: { owner, dubbers, lookout, phase: "copy" | "scatter", progress, finished, joined, talkAt }
+  let dubNear = false;        // is the player close enough to join?
+  let dubWait = 0, dubPeriod = "";
+  let dubFun = { day: -1, n: 0 };
+  const DUB_SPOTS = [[0, -0.85], [-0.95, 0.1], [0.95, 0.1], [-0.75, -0.8], [0.75, -0.8]];   // places round the desk. NPCs use the first three
+  const DUB_COPY = ["Hey no dey breathe for me face!", "Shift small, you dey block the light!", "Which one be number 3?", "No copy the mistake too o!", "Abeg write am small small!",
+    "Oya turn the page!", "Ahn-ahn, you dey write too slow!", "Wait, I never finish that line!", "Una dey press me o, my hand go break!", "Make I see number 5 sharp sharp!"];
+  const DUB_OWNER = ["Una wan finish my book?", "Abeg no tear my page!", "Na only five minutes una get o!", "Next time, do your own work!", "Hold the book gently, abeg!"];
+  const DUB_LOOKOUT = ["I dey watch the door. Hurry up!", "No teacher yet... still clear.", "Quick quick! Eyes dey the door.", "Anybody see teacher? I no see am."];
+  const DUB_GIST = [
+    { you: "Abeg, no dey breathe for my face!", reply: "Na your own breath dey smell, my guy! 😂" },
+    { you: "Shift small, you dey block the light!", reply: "Light? Na assignment I dey chase o!" },
+    { you: "Which one be number 3?", reply: "Number 3? E too long, just copy am as e be." },
+    { you: "Make nobody tell teacher o!", reply: "We dey together, no wahala!" }
+  ];
+  const dubDesk = (n) => ({ x: DESK_X[seatId(n) % 4], z: DESK_Z[Math.floor(seatId(n) / 4)] });
+  const dubTeacher = () => npcs.find((n) => n.inRoom && n.kind === "teacher");
+  function teacherComing() {                              // is the teacher about to walk in? (the lookout shouts)
+    if (lateLeft > 0) return lateLeft < 4;                // Class 2 or 4: the next teacher is waiting outside the door
+    const t = npcs.find((n) => n.kind === "teacher" && n.label === CLASS_TEACHER[clock.period]);
+    if (!t || t.inRoom) return false;
+    return t.mode === "class" && !t.inside && Math.hypot(t.x - DOOR_OUT.x, t.z - DOOR_OUT.z) < 7;
+  }
+  function dubStep(n, tx, tz, dt, fx, fz) {               // walk an NPC to a spot; true when it has arrived
+    const dx = tx - n.x, dz = tz - n.z, dist = Math.hypot(dx, dz);
+    if (dist > 0.05) {
+      const step = Math.min(dist, 3.2 * dt);
+      n.x += dx / dist * step; n.z += dz / dist * step; n.face = Math.atan2(dx, dz);
+      animate(n, true, dt, 10);
+      return false;
+    }
+    animate(n, false, dt, 10);
+    if (fx != null) n.face = Math.atan2(fx - n.x, fz - n.z);
+    return true;
+  }
+  function teacherLateFor() {                             // seconds the teacher is still expected to be missing (0 = on time)
+    if (lateLeft > 0) return lateLeft;
+    const t = npcs.find((n) => n.kind === "teacher" && n.label === CLASS_TEACHER[clock.period]);
+    if (!t || t.inRoom || t.inside) return 0;
+    return (t.lateT > 0 ? t.lateT : 0) + Math.hypot(t.x - DOOR_OUT.x, t.z - DOOR_OUT.z) / t.speed;   // waiting time + walking time to the door
+  }
+  function startDub(kids) {
+    const mids = kids.filter((n) => { const col = seatId(n) % 4; return col === 1 || col === 2; });   // a desk with room round it
+    const owner = pickOne(mids.length ? mids : kids);
+    const rest = shuffle(kids.filter((n) => n !== owner));
+    dub = { owner: owner, dubbers: rest.slice(0, 3), lookout: rest[3] || null, phase: "copy", progress: 0, finished: false, joined: false, talkAt: 0.4 };
+    dubPeriod = doneKey(); dubWait = 0;
+    say(owner, pickOne(DUB_OWNER), 3);
+    flashHint("📝 The teacher is late! Students are copying an assignment. Walk close to join the dubbing.", 6500);
+  }
+  function updateDub(dt) {
+    if (lateLeft > 0) lateLeft -= dt;
+    if (dub) { runDub(dt); return; }
+    if (scene !== "class" || !clock.period.startsWith("Class") || dubPeriod === doneKey() || dubTeacher() || lesson || trip) { dubWait = 0; return; }
+    const kids = npcs.filter((n) => n.inRoom && n.kind === "student" && !n.specialCrush);
+    if (kids.length < 4 || teacherLateFor() < 9) { dubWait = 0; return; }   // an on-time teacher gives them no time to dub
+    dubWait += dt;
+    if (dubWait >= 3) startDub(kids);
+  }
+  function runDub(dt) {
+    const d = dub;
+    if (dubTeacher()) { endDub(true); return; }           // the teacher walked in
+    if (scene !== "class" || !clock.period.startsWith("Class")) { endDub(false); return; }
+    const dk = dubDesk(d.owner);
+    if (d.phase === "copy" && teacherComing()) {
+      d.phase = "scatter";
+      say(d.lookout || pickOne(d.dubbers), "TEACHER DEY COME! Scatter!!", 3);
+      if (d.joined && dialogue === dubActor) showLine("🚨 TEACHER DEY COME!", "The lookout hisses: \"Scatter! Teacher dey come!\" Decide quick!", [
+        { text: "🏃 Run back to my seat", dubAction: "run" },
+        { text: "✍️ One more line... (risky)", dubAction: "risk" }
+      ]);
+    }
+    d.talkAt -= dt;
+    if (d.phase === "copy" && d.talkAt <= 0) {
+      d.talkAt = rand(1.4, 2.8);
+      const who = pickOne(d.dubbers.concat([d.owner], d.lookout ? [d.lookout] : []));
+      if (who.inRoom) say(who, pickOne(who === d.owner ? DUB_OWNER : who === d.lookout ? DUB_LOOKOUT : DUB_COPY), 2.8);
+    }
+    let allSeated = true;
+    d.owner.armR = d.phase === "copy" ? -0.75 + Math.sin(uiTime * 8) * 0.3 : null;   // the owner writes too
+    const movers = d.dubbers.map((n, i) => ({ n: n, x: dk.x + DUB_SPOTS[i][0], z: dk.z + DUB_SPOTS[i][1], fx: dk.x, fz: dk.z }));
+    if (d.lookout) movers.push({ n: d.lookout, x: -1.5, z: 4.4, fx: 0, fz: 5.1 });
+    for (const m of movers) {
+      const n = m.n;
+      if (!n.inRoom) continue;
+      if (d.phase === "copy") {
+        n.seated = false;
+        const there = dubStep(n, m.x, m.z, dt, m.fx, m.fz);
+        n.armR = there && n !== d.lookout ? -0.75 + Math.sin(uiTime * 9 + m.x * 3) * 0.3 : null;   // the writing arm moves while copying
+      } else {
+        n.armR = null;
+        const sp = seatFor(n);
+        if (dubStep(n, sp.x, sp.z, dt)) { n.face = sp.face; n.seated = true; } else { n.seated = false; allSeated = false; }
+      }
+    }
+    if (d.phase === "scatter" && allSeated && !d.joined) dub = null;   // everybody is innocent again
+  }
+  function endDub(teacherArrived) {
+    const d = dub; dub = null;
+    d.owner.armR = null;
+    for (const n of d.dubbers.concat(d.lookout ? [d.lookout] : [])) {
+      n.armR = null;
+      if (!n.inRoom) continue;
+      const sp = seatFor(n); n.x = sp.x; n.z = sp.z; n.face = sp.face; n.seated = true; n.sw = 0;
+    }
+    if (dialogue === dubActor) {
+      closeDialogue();
+      if (d.joined) { if (teacherArrived) dubCaught(); else sendToSeat(); }
+    }
+  }
+  function sendToSeat() {                                 // put the player in the nearest free seat
+    let best = -1, bd = 1e9;
+    for (let id = 0; id < 12; id++) {
+      if (seatTaken(id)) continue;
+      const p = seatPos(id), dd = Math.hypot(p.x - pl.x, p.z - pl.z);
+      if (dd < bd) { bd = dd; best = id; }
+    }
+    if (best >= 0) sit(best);
+  }
+  function dubCaught() {
+    const t = dubTeacher();
+    const name = t ? t.label : (CLASS_TEACHER[clock.period] || "The teacher");
+    addMoney(-60); popularity = Math.max(0, popularity - 1); friendship = Math.max(0, friendship - 1);
+    if (t) say(t, "STUDENT! You are copying?!", 3);
+    sendToSeat();
+    flashHint(name + " caught you copying! -₦60, and your mates lose respect.", 5500);
+  }
+  function dubPayout() {                                  // the assignment money is paid once per school day
+    if (assignmentDay !== clock.day) { assignmentDay = clock.day; addMoney(25); return "✅ You finish copying the assignment! +₦25. Try to understand am o, exam no dey copy."; }
+    return "✅ You finish copying. (You already got today's assignment money.)";
+  }
+  function dubScreen(line) {
+    const d = dub;
+    showLine("📝 DUBBING · " + d.owner.label + "'s book · " + (d.finished ? "Copied ✅" : "Copied " + d.progress + "/" + COPY_GOAL), line, [
+      ...(d.finished ? [] : [{ text: "✍️ Copy small small (+1)", dubAction: "copy" }]),
+      { text: "🗣️ Join the gist", dubAction: "gist" },
+      { text: "🚪 Go back to my seat", dubAction: "seat" }
+    ]);
+  }
+  function dubJoin() {
+    const d = dub;
+    if (!d || d.phase !== "copy" || d.joined || dialogue || lesson || pl.onSwing) return;
+    if (pl.seated) standUp();
+    const dk = dubDesk(d.owner);
+    let spot = null;
+    for (const k of [3, 4, 2, 1]) {                       // the first free place that is not a wall
+      const x = dk.x + DUB_SPOTS[k][0], z = dk.z + DUB_SPOTS[k][1];
+      if (freeRoom(x, z)) { spot = { x: x, z: z }; break; }
+    }
+    if (!spot) spot = { x: dk.x, z: dk.z + DUB_SPOTS[0][1] };
+    pl.x = spot.x; pl.z = spot.z; pl.face = Math.atan2(dk.x - spot.x, dk.z - spot.z);
+    d.joined = true;
+    dialogue = dubActor; dubActor.talking = true;
+    keys.up = keys.down = keys.left = keys.right = false;
+    dlg.style.display = "block"; padEl.style.display = "none"; talkBtn.style.display = "none";
+    dubScreen("You squeeze in. " + d.owner.label + " slides the book to the middle. Everybody is writing fast!");
+  }
+  function handleDub(c) {
+    const d = dub, a = c.dubAction;
+    if (!d) { closeDialogue(); return; }
+    if (a === "copy") {
+      d.progress++;
+      const mate = pickOne(d.dubbers);
+      if (mate.inRoom) say(mate, pickOne(DUB_COPY), 2.6);
+      if (d.progress >= COPY_GOAL) { d.finished = true; dubScreen(dubPayout()); return; }
+      dubScreen(pickOne(["You scribble fast. " + d.owner.label + " says: careful, no copy my mistake too!", "Elbows everywhere! You still manage one more line.", "Your pen dey fly. Almost there!"]));
+      return;
+    }
+    if (a === "gist") {
+      const gst = pickOne(DUB_GIST), who = pickOne(d.dubbers);
+      say(pl, gst.you, 2.8); if (who.inRoom) say(who, gst.reply, 3);
+      if (dubFun.day !== clock.day) dubFun = { day: clock.day, n: 0 };
+      let msg = "Everybody laughs quietly.";
+      if (dubFun.n < 3) { dubFun.n++; popularity += 1 + (perkIs("playful") ? 1 : 0); friendship++; msg += " (+⭐ +💗)"; }
+      else msg += " (The gist is getting old. No more points today.)";
+      dubScreen(who.label + ": \"" + gst.reply + "\" " + msg);
+      return;
+    }
+    d.joined = false; closeDialogue();
+    if (a === "seat" || a === "run") {
+      sendToSeat();
+      flashHint(a === "run" ? "Phew! You reach your seat before the teacher. 😅" : "You slip back to your seat. 😇", 3500);
+    } else if (a === "risk") {
+      if (Math.random() < Math.min(0.9, 0.5 * levelOf().catchMul)) dubCaught();
+      else {
+        let msg = "Phew! You got one more line and slid into your seat in time. 😅";
+        if (!d.finished) { d.progress++; if (d.progress >= COPY_GOAL) { d.finished = true; msg = dubPayout(); } }
+        sendToSeat(); flashHint(msg, 5000);
+      }
+    }
+  }
+
+  // ---------- START MENU AND CHARACTER CHOICE ----------
+  const menuEl = document.getElementById("menu"), mBox = document.getElementById("mbox");
+  let menuOpen = true;
+  let profile = null;                                   // { sex, crush (always the opposite sex), perk, level, start }
+  try { profile = JSON.parse(localStorage.getItem("naijaHighProfile") || "null"); } catch (e) { profile = null; }
+  // The crush is always the opposite sex. A broken or old save is repaired here instead of crashing the game.
+  if (!profile || typeof profile !== "object" || (profile.sex !== "boy" && profile.sex !== "girl")) profile = null;
+  else {
+    const rightCrush = profile.sex === "boy" ? "girl" : "boy";
+    if (profile.crush !== rightCrush) { profile.crush = rightCrush; crushNpc.contactExchanged = false; crushConfidence = 0; }
+  }
+  const BUN = [25, 20, 20];
+  const CRUSH = {
+    girl: { name: "Zara",  tag: [255, 225, 245], look: Object.assign(look([220, 105, 155], [45, 70, 150], SKINS[2], [230, 170, 40]), { bun: BUN }) },
+    boy:  { name: "Chuka", tag: [215, 235, 255], look: look([95, 160, 225], [45, 70, 150], SKINS[1], [230, 170, 40]) }
+  };
+  function applyProfile() {
+    const c = CRUSH[profile.crush];
+    crushNpc.label = c.name; crushNpc.tag = c.tag; crushNpc.look = c.look; crushNpc.info.name = c.name;
+    pl.look = look([240, 240, 240], [30, 60, 140], SKINS[0], BAGS[0]);
+    if (profile.sex === "girl") pl.look.bun = BUN;
+  }
+  function hasProgress() {
+    try { return !!profile || money > 0 || lessonsTotal > 0 || !!localStorage.getItem("naijaHighSocial"); } catch (e) { return !!profile; }
+  }
+  function menuScreen(title, sub, buttons) {
+    mBox.textContent = "";
+    const add = (id, text) => { const d = document.createElement("div"); d.id = id; d.textContent = text; mBox.appendChild(d); };
+    add("mtitle", title); add("msub", sub);
+    for (const b of buttons) {
+      const el = document.createElement("button");
+      el.textContent = b.text;
+      el.addEventListener("click", b.run);
+      mBox.appendChild(el);
+    }
+    add("mfoot", "Made by DrIntel");
+  }
+  // Life-as perks and starting-day presets. Both are saved INSIDE the profile (same key as before).
+  const PERKS = {
+    brilliant: { name: "🧠 Brilliant", note: "Quizzes: +4 seconds, ₦50 per right answer" },
+    playful:   { name: "🎈 Playful",   note: "Truth or Dare: +1 extra popularity" },
+    stubborn:  { name: "💪 Stubborn",  note: "Energy drains 30% slower, lessons tire you less" },
+    charming:  { name: "😎 Charming",  note: "Crush talks: +1 extra confidence" }
+  };
+  const STARTS = {
+    early:    { name: "🌅 Early bird",     note: "7:30 AM, Arrival, full energy",       min: 450, energy: 100 },
+    assembly: { name: "🔔 Assembly rush",  note: "8:00 AM, catch the assembly, energy 90", min: 480, energy: 90 },
+    class1:   { name: "📚 Late to class",  note: "9:00 AM, Class 1 begins, energy 75",   min: 540, energy: 75 },
+    brk:      { name: "🍲 Break time",     note: "11:00 AM, Break, energy 65",           min: 660, energy: 65 }
+  };
+  const LEVELS = {
+    1: { id: 1, short: "Level 1", name: "🌱 Level 1 · First day at school", note: "Day 1. You are new here. Quizzes: 3 questions. Teachers go easy on copying.", day: 1, q: 3, timeCut: 0, pay: 0, catchMul: 0.5 },
+    2: { id: 2, short: "Level 2", name: "📅 Level 2 · Second week in school", note: "Day 8. Normal school life. Quizzes: 4 questions.", day: 8, q: 4, timeCut: 0, pay: 0, catchMul: 1 },
+    3: { id: 3, short: "Level 3", name: "📝 Level 3 · Exam week", note: "Day 15. Quizzes: 5 questions, 2 seconds less, but +₦10 per right answer. Teachers watch closely.", day: 15, q: 5, timeCut: 2, pay: 10, catchMul: 1.5 }
+  };
+  function levelOf() { return (profile && LEVELS[profile.level]) || LEVELS[1]; }   // old saves have no level: they get Level 1
+  let applied = "";                                       // which level|start was applied last, so Continue can never refill energy
+  function startGame() {
+    applyProfile();
+    const st = STARTS[profile.start] || STARTS.early, lv = levelOf();
+    const sig = lv.id + "|" + (STARTS[profile.start] ? profile.start : "early");
+    if (applied !== sig) {                                // a new level or a new start: set the clock (the very first time, also the energy)
+      const first = applied === "";
+      applied = sig;
+      if (!first) resetScenes();
+      clock.min = st.min; clock.day = lv.day; clock.period = ""; // empty period makes the bell and the NPCs react to the new time
+      energy = first ? st.energy : Math.min(energy, st.energy);  // changing the menu mid-game can lower energy, never raise it
+    }
+    menuEl.style.display = "none"; menuOpen = false;
+    const pk = PERKS[profile.perk];
+    flashHint((pk ? "Life as " + pk.name + " · " : "") + lv.short + " · " + st.name, 6000);
+  }
+  function chooseSex() {
+    menuScreen("Who are you?", "Pick your character.", [
+      { text: "👦 I am a boy", run: () => choosePerk("boy") },
+      { text: "👧 I am a girl", run: () => choosePerk("girl") }
+    ]);
+  }
+  function choosePerk(sex) {
+    const buttons = Object.keys(PERKS).map((k) => ({ text: PERKS[k].name + "\n" + PERKS[k].note, run: () => chooseLevel(sex, k) }));
+    buttons.push({ text: "← Back", run: chooseSex });
+    menuScreen("Life as...", "Pick one perk. It stays with you.", buttons);
+  }
+  function chooseLevel(sex, perk) {
+    const buttons = Object.keys(LEVELS).map((k) => ({ text: LEVELS[k].name + "\n" + LEVELS[k].note, run: () => chooseStart(sex, perk, Number(k)) }));
+    buttons.push({ text: "← Back", run: () => choosePerk(sex) });
+    menuScreen("Choose your level", "Money and points are never reset by this.", buttons);
+  }
+  function chooseStart(sex, perk, level) {
+    const buttons = Object.keys(STARTS).map((k) => ({ text: STARTS[k].name + "\n" + STARTS[k].note, run: () => finishChoice(sex, perk, level, k) }));
+    buttons.push({ text: "← Back", run: () => chooseLevel(sex, perk) });
+    menuScreen("How does your day start?", "Money and points are never reset by this.", buttons);
+  }
+  function finishChoice(sex, perk, level, start) {
+    const crush = sex === "boy" ? "girl" : "boy";         // the crush follows from who you are
+    const before = profile ? profile.crush : "girl";
+    if (before !== crush) { crushNpc.contactExchanged = false; crushConfidence = 0; crushToday = { day: -1 }; }   // new crush, fresh start
+    profile = { sex: sex, crush: crush, perk: perk, level: level, start: start };
+    try { localStorage.setItem("naijaHighProfile", JSON.stringify(profile)); } catch (e) { /* saving is optional */ }
+    startGame();
+  }
+  function openMenu() {
+    if (!hasProgress()) { chooseSex(); return; }
+    const pk = profile && PERKS[profile.perk], st = profile && STARTS[profile.start];
+    const who = (pk ? pk.name : "No perk yet") + " · " + levelOf().short + " · " + (st ? st.name : STARTS.early.name);
+    menuScreen("Naija High", "Welcome back! Your money and points are saved. " + who, [
+      { text: "▶ Continue", run: () => { if (!profile) profile = { sex: "boy", crush: "girl" }; startGame(); } },
+      { text: "🎭 Choose who I am", run: chooseSex }
+    ]);
+  }
+  openMenu();
+  // the 🔄 button: pause the game and go back to the menu (change perk, character or crush)
+  document.getElementById("menuBtn").addEventListener("click", () => {
+    if (menuOpen || dead) return;
+    keys.up = keys.down = keys.left = keys.right = false;
+    menuOpen = true; menuEl.style.display = "flex";
+    openMenu();
+  });
+
+  function drawBall(project, focal) {
+    const bp = project([ball.x, 0.62, ball.z]);
+    const shadow = project([ball.x, 0.51, ball.z]);
+    if (bp[2] > 0.1 && bp[0] > -30 && bp[0] < W + 30 && bp[1] > -30 && bp[1] < H + 30) {
+      g.fillStyle = "rgba(0,0,0,0.25)"; g.beginPath(); g.ellipse(shadow[0], shadow[1], 10, 5, 0, 0, Math.PI * 2); g.fill();
+      g.fillStyle = "#f7f7f7"; g.beginPath(); g.arc(bp[0], bp[1], Math.max(5, Math.min(15, focal / bp[2] * 0.16)), 0, Math.PI * 2); g.fill();
+      g.strokeStyle = "#202020"; g.lineWidth = 2; g.stroke();
+      g.fillStyle = "#202020"; g.beginPath(); g.arc(bp[0], bp[1], Math.max(2, Math.min(5, focal / bp[2] * 0.055)), 0, Math.PI * 2); g.fill();
+    }
+    g.strokeStyle = "rgba(0,0,0,0.2)"; g.lineWidth = 1;          // put the pen back for the blocks
+  }
+
+  let last = 0;
+  function frame(now) {
+    requestAnimationFrame(frame);
+    const dt = (menuOpen || dead) ? 0 : Math.min((now - last) / 1000, 0.05); // seconds since last frame, capped (0 while the menu is open)
+    last = now;
+    updatePlayer(dt);
+    for (const n of npcs) updateNpc(n, dt);
+    if (scene === "outside") {
+      const bx = ball.x + ball.vx * dt, bz = ball.z + ball.vz * dt;
+      if (free(bx, ball.z)) ball.x = bx; else ball.vx *= -0.55;   // bounce off trees, fence, stall
+      if (free(ball.x, bz)) ball.z = bz; else ball.vz *= -0.55;
+      const drag = Math.pow(0.10, dt); ball.vx *= drag; ball.vz *= drag;
+      if (Math.abs(ball.vx) + Math.abs(ball.vz) < 0.08) ball.vx = ball.vz = 0;
+      if (ball.x < -15 || ball.x > 15) { ball.x = Math.max(-15, Math.min(15, ball.x)); ball.vx *= -0.55; }
+      if (ball.z < -11 || ball.z > 29) { ball.z = Math.max(-11, Math.min(29, ball.z)); ball.vz *= -0.55; }
+    }
+    updateTraffic(dt);
+    updateRoadWarning();
+    updateClock(dt);
+    updateInteract();
+    updateEnergy(dt);
+    updateDirector(dt);
+    // One pendulum angle drives the chains, seat and player together.
+    // The seat follows a proper arc from the fixed top pivot instead of sliding sideways.
+    SWING.angle = pl.onSwing ? Math.sin(uiTime * 2.35) * 0.48 : Math.sin(uiTime * 0.8) * 0.018;
+    const seatY = SWING_PIVOT_Y - Math.cos(SWING.angle) * SWING_LENGTH;
+    const seatZ = SWING.z + Math.sin(SWING.angle) * SWING_LENGTH;
+    swingSeat.rx = SWING.angle;
+    swingSeat.p[0] = SWING.x;
+    swingSeat.p[1] = seatY;
+    swingSeat.p[2] = seatZ;
+    for (let i = 0; i < swingChains.length; i++) {
+      const dx = i === 0 ? -0.32 : 0.32;
+      swingChains[i].rx = SWING.angle;
+      swingChains[i].p[0] = SWING.x + dx;
+      swingChains[i].p[1] = (SWING_PIVOT_Y + seatY) / 2;
+      swingChains[i].p[2] = (SWING.z + seatZ) / 2;
+    }
+    if (pl.onSwing) {
+      // Keep the seated character attached to the seat's exact arc and height.
+      pl.x = SWING.x;
+      pl.z = seatZ;
+      pl.yOffset = seatY - 0.5;
+      pl.face = Math.PI;
+      pl.seated = true;
+    }
+    updateRoom(dt);
+    updateLesson(dt);
+    updateDub(dt);
+    updateHome(dt);
+
+    const list = [];
+    addCharacter(list, pl);
+    for (const n of npcs) if (visibleHere(n)) addCharacter(list, n);
+    if (scene === "outside") for (const v of traffic) if (Math.abs(v.x - pl.x) < 24) addVehicle(list, v);
+
+    const target = [pl.x, 1, pl.z];
+    const cam = [pl.x + Math.sin(camYaw) * 11, camHeight, pl.z + Math.cos(camYaw) * 11];
+    // the world we are in; classroom walls between the camera and the room are left out
+    const world = scene === "outside" ? solids : room.filter((b) => !b.cut || b.cut[0] * cam[0] + b.cut[1] * cam[2] <= b.cut[2]);
+    for (const b of world) list.push(b);
+    const f = norm(sub(target, cam));
+    const r = norm(cross(f, [0, 1, 0]));
+    const u = cross(r, f);
+    const focal = Math.min(W, H) * 1.1 * camZoom;
+    const project = (p) => {
+      const d = sub(p, cam);
+      const z = dot(d, f);
+      return [W / 2 + focal * dot(d, r) / z, H / 2 - focal * dot(d, u) / z, z];
+    };
+
+    g.fillStyle = scene === "outside" ? "#87ceeb" : "#2a2d3a";
+    g.fillRect(0, 0, W, H);
+    g.strokeStyle = "rgba(0,0,0,0.2)";
+
+    // ground first: flat tiles never cover anything standing on them
+    for (const tl of (scene === "outside" ? tiles : roomTiles)) {
+      const pts = [[tl.i, 0.5, tl.j], [tl.i + 1, 0.5, tl.j], [tl.i + 1, 0.5, tl.j + 1], [tl.i, 0.5, tl.j + 1]].map(project);
+      if (pts.some((q) => q[2] < 0.1)) continue;
+      drawQuad(pts, "rgb(" + tl.c.join(",") + ")");
+    }
+
+    // then everything else, far to near
+    const dist = (b) => Math.hypot(b.p[0] - cam[0], b.p[1] - cam[1], b.p[2] - cam[2]);
+    if (scene === "outside") for (const s of SIGNS) list.push(s);
+    if (scene === "outside") list.push({ ball: true, p: [ball.x, 0.62, ball.z], h: [0, 0, 0], c: [0, 0, 0] });
+    list.sort((a, b) => dist(b) - dist(a));
+    for (const b of list) {
+      if (b.sign) { drawSign(b, project, cam); continue; }
+      if (b.ball) { drawBall(project, focal); continue; }
+      for (const face of FACES) {
+        const n = orient(face.n, b);
+        const local = [face.n[0] * b.h[0], face.n[1] * b.h[1], face.n[2] * b.h[2]];
+        const center = add(b.p, orient(local, b));
+        if (dot(n, sub(cam, center)) <= 0) continue;
+        const pts = face.v.map((k) =>
+          project(add(b.p, orient([k[0] * b.h[0], k[1] * b.h[1], k[2] * b.h[2]], b)))
+        );
+        if (pts.some((q) => q[2] < 0.1)) continue;
+        drawQuad(pts, "rgb(" + b.c.map((v) => Math.round(v * face.s)).join(",") + ")");
+      }
+    }
+
+    drawNameTags(project);
+    drawBubbles(project, dt);
+    drawFloaters(project, dt);
+  }
+  requestAnimationFrame(frame);
+} catch (e) {
+  document.getElementById("footer").textContent = "Error: " + e.message;
+}
+</script>
+</body>
+</html>
